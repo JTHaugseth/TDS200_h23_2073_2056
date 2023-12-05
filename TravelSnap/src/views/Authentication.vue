@@ -129,7 +129,7 @@ watch(
                     Logg inn
                 </ion-button>
 
-                <ion-button @click="googleLogin" class="button-auth" fill="solid" color="dark" size="default">
+                <ion-button @click="googleLogin" class="button-auth"  size="default">
                     <ion-icon name="logo-google"></ion-icon>
                 </ion-button>
 
@@ -203,7 +203,7 @@ ion-input {
 }
 
 .forgot-password-link {
-    color: var(--ion-color-success-contrast);
+    color: var(--ion-color-tertiary-contrast);
     cursor: pointer;
     text-decoration: underline;
 }
