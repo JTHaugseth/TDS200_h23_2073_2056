@@ -85,13 +85,15 @@ watch(
     <ion-page>
         <ion-content>
             <ion-list>
+
                 <ion-list-header>
                     <ion-title>Sign in</ion-title>
                 </ion-list-header>
-                
+
                 <ion-item v-if="inRegisterMode">
-                    <ion-input label="Username" v-model="userDetails.userName"></ion-input>
+                    <ion-input placeholder="Username" v-model="userDetails.userName"></ion-input>
                 </ion-item>
+
                 <ion-item>
                     <ion-input placeholder="Email" type="email" v-model="userDetails.email"></ion-input>
                 </ion-item>
@@ -99,19 +101,20 @@ watch(
                 <ion-item>
                     <ion-input :type="showPassword ? 'text' : 'password'" placeholder="Password"
                         v-model="userDetails.password"></ion-input>
-                    <ion-button class="show-password-button" @click="showPassword = !showPassword" slot="end">
+                    <ion-button class="show-password-button" @click="showPassword = !showPassword" fill="clear">
                         <ion-icon :name="showPassword ? 'eye' : 'eye-off'"></ion-icon>
                     </ion-button>
                 </ion-item>
-                
+
                 <ion-item v-if="inRegisterMode">
-        <ion-input :type="showConfirmPassword ? 'text' : 'password'" placeholder="Confirm Password"
-            v-model="userDetails.confirmPassword" :style="{ 'border': isPasswordMismatch ? '1px solid red' : 'none', 'border-radius': '5px' }"></ion-input>
-        <ion-button class="show-password-button" @click="showConfirmPassword = !showConfirmPassword" slot="end">
-            <ion-icon :name="showConfirmPassword ? 'eye' : 'eye-off'"></ion-icon>
-        </ion-button>
-        <ion-label v-if="isPasswordMismatch" class="password-error-message">Passwords do not match.</ion-label>
-    </ion-item>
+                    <ion-input :type="showConfirmPassword ? 'text' : 'password'" placeholder="Confirm Password"
+                        v-model="userDetails.confirmPassword"
+                        :style="{ 'border': isPasswordMismatch ? '1px solid red' : 'none', 'border-radius': '5px' }"></ion-input>
+                    <ion-button class="show-password-button" @click="showConfirmPassword = !showConfirmPassword" fill="clear">
+                        <ion-icon :name="showConfirmPassword ? 'eye' : 'eye-off'"></ion-icon>
+                    </ion-button>
+                    <ion-label v-if="isPasswordMismatch" class="password-error-message">Passwords do not match.</ion-label>
+                </ion-item>
 
                 <ion-item lines="none" class="center-text">
                     <ion-label @click="forgotPassword" class="forgot-password-link">
@@ -119,21 +122,20 @@ watch(
                     </ion-label>
                 </ion-item>
 
-                <ion-button v-if="inRegisterMode" @click="register" class="button-auth" fill="solid" color="dark"
-                    size="default">
+                <ion-button v-if="inRegisterMode" @click="register" class="button-auth" size="default">
                     Registrer deg
                 </ion-button>
-                <ion-button v-else @click="login" class="button-auth" fill="solid" color="dark" size="default">
+                <ion-button v-else @click="login" class="button-auth" size="default">
                     Logg inn
                 </ion-button>
 
                 <ion-button @click="googleLogin" class="button-auth" fill="solid" color="dark" size="default">
-                    Google Log in
+                    <ion-icon name="logo-google"></ion-icon>
                 </ion-button>
 
                 <ion-item lines="none">
                     <ion-label class="label-mild-inline">
-                        Need a user? <a class="register-link" @click="toggleRegisterMode">Register</a>
+                        Don't have an account? <a class="register-link" @click="toggleRegisterMode">Sign up here</a>
                     </ion-label>
                 </ion-item>
             </ion-list>
@@ -150,10 +152,9 @@ ion-list {
     display: flex;
     flex-direction: column;
 }
-ion-list-header {
-    justify-content: flex-start;    
-}
+
 ion-title {
+    text-align: center;
     color: var(--ion-color-success);
 }
 
@@ -173,20 +174,22 @@ ion-input {
 }
 
 .button-auth {
-    margin-top: 50px;
-    margin-left: 10px;
-    margin-right: 10px;
-    --background: #333333;
+    margin-top: 3%;
+    margin-left: 10%;
+    margin-right: 10%;
+    --background: var(--ion-color-success);
     /* Darker background for buttons */
-    --color: #ffffff;
+    --color: White;
     /* White text color for buttons */
 }
 
 .register-link {
-    color: #4db8ff;
-    /* Light blue for links */
+    color: var(--ion-color-success);
     cursor: pointer;
     text-decoration: underline;
+}
+.label-mild-inline {
+    text-align: center;
 }
 
 .password-mismatch {
@@ -196,34 +199,29 @@ ion-input {
 
 .center-text {
     display: flex;
-    justify-content: center;
-    align-items: center;
+    text-align: center;
 }
 
 .forgot-password-link {
-    color: #4db8ff;
-    /* Choose an appropriate color */
+    color: var(--ion-color-success-contrast);
     cursor: pointer;
     text-decoration: underline;
 }
 
 .password-error-message {
-    color: red;
-    /* Red color for the error message */
+    color: red !important;
     font-size: 0.8rem;
-    /* Adjust font size as needed */
     padding-top: 5px;
-    /* Spacing between the input and the error message */
 }
 
 .show-password-button {
-    --background: #333333; /* Same as ion-input background */
-    --color: #ffffff; /* Same as ion-input text color */
+    --background: transparent;
+    --border-width: 0;
+    --ripple-color: transparent;
+    --color: #ffffff;
 }
 
-/* If you want to adjust the ion-icon color to match the button */
 .show-password-button ion-icon {
-    --color: #ffffff; /* Adjust as needed */
+    --color: #ffffff;
 }
-
 </style>
