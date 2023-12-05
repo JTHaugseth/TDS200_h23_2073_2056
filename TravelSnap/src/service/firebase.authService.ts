@@ -28,8 +28,7 @@ import {
           const result = await signInWithPopup(getAuth(), provider);
           const credential = GoogleAuthProvider.credentialFromResult(result);
           const token = credential?.accessToken;
-          const user = result.user;
-          return user;  
+          return token; // Return only the token
       } catch (error) {
           console.error("Error during Google Sign-In:", error);
           return null;  

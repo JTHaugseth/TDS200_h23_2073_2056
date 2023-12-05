@@ -20,10 +20,10 @@
     "@capacitor/keyboard": "5.0.6",
     "@capacitor/preferences": "^5.0.6",
     "@capacitor/status-bar": "5.0.6",
-    "@ionic/vue": "^7.0.0",
-    "@ionic/vue-router": "^7.0.0",
+    "@ionic/vue": "^7.5.7",
+    "@ionic/vue-router": "^7.5.7",
     "firebase": "^10.7.0",
-    "ionicons": "^7.0.0",
+    "ionicons": "^7.2.1",
     "vue": "^3.3.0",
     "vue-router": "^4.2.5"
   },

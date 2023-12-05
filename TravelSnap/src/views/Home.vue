@@ -15,9 +15,10 @@
     </ion-page>
   </template>
   
-  <script>
+  <script >
   import { useRouter } from 'vue-router';
-  import { authService } from '@/service/authService'; // Adjust the path as needed
+  import { IonButton, IonContent, IonInput, IonItem, IonLabel, IonList, IonListHeader, IonPage, IonToggle, IonTitle, IonIcon, toastController } from '@ionic/vue';
+  import { authService } from '@/service/firebase.authService'; // Adjust the path as needed
   
   export default {
     setup() {
