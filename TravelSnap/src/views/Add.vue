@@ -1,25 +1,147 @@
 <script setup lang="ts">
-  import {
-  IonPage,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
-  IonContent,
-  IonList,
-  IonItem,
-  IonLabel,
-  IonToggle
-} from '@ionic/vue';
+import { IonBackButton, IonButton, IonButtons, IonChip, IonContent, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonList, IonPage, IonTextarea, IonTitle, IonToolbar, toastController } from '@ionic/vue';
+import { cameraOutline, trashOutline, add } from 'ionicons/icons';
+import { ref } from 'vue';
+import { Camera, CameraResultType } from '@capacitor/camera';
+import { getFirestore, doc, setDoc, collection } from "firebase/firestore";
+import {
+  getStorage,
+  uploadBytes,
+  getDownloadURL,
+  ref as storageRef
+} from "firebase/storage";
+import { v4 as uuidv4 } from "uuid";
+import { useRouter } from 'vue-router';
 
+const router = useRouter();
+const newLocation = ref({
+  title: '',
+  description: '',
+  hashtags: [],
+  imageUrls: [],
+  latitude: null,
+  longitude: null,
+  id: ''
+});
+const locationCollection = collection(getFirestore(), "locations");
+const newHashtagText = ref("");
+
+const addNewHashtag = () => {
+  if (newHashtagText.value && !newLocation.value.hashtags.includes(newHashtagText.value)) {
+    newLocation.value.hashtags.push(newHashtagText.value);
+    newHashtagText.value = "";
+  }
+};
+
+const postNewLocation = async () => {
+  if (!newLocation.value.title || !newLocation.value.description || newLocation.value.imageUrls.length === 0) {
+    alert("Please complete all fields and upload at least one image");
+    return;
+  }
+ 
+
+  try {
+    const generatedUUID = uuidv4();
+    const newImageUrls = [];
+    for (const imageUrl of newLocation.value.imageUrls) {
+      const imageName = `${new Date().getTime()}.jpg`;
+      const storage = getStorage();
+      const imageStorageRef = storageRef(storage, `images/${imageName}`);
+      const response = await fetch(imageUrl);
+      const imageBlob = await response.blob();
+      const snapshot = await uploadBytes(imageStorageRef, imageBlob);
+      const url = await getDownloadURL(snapshot.ref);
+      newImageUrls.push(url);
+    }
+    newLocation.value.imageUrls = newImageUrls;
+    newLocation.value.id = generatedUUID;
+    await setDoc(doc(locationCollection, generatedUUID), newLocation.value);
+    router.replace('/home');
+  } catch (error) {
+    console.error("Error posting location:", error);
+    alert("Error posting location");
+  }
+};
+
+const triggerCamera = async () => {
+  const photo = await Camera.getPhoto({
+    quality: 100,
+    allowEditing: false,
+    resultType: CameraResultType.Uri,
+  });
+  if (photo.webPath) {
+    newLocation.value.imageUrls.push(photo.webPath);
+  }
+};
+
+const removeImagePreview = (index) => {
+  if (index >= 0 && index < newLocation.value.imageUrls.length) {
+    newLocation.value.imageUrls.splice(index, 1);
+  }
+};
 </script>
-
 <template>
     <ion-page>
-      <ion-header>
+      <ion-header :translucent="true">
         <ion-toolbar>
-          <ion-title>Add</ion-title>
+          <ion-buttons slot="start">
+            <ion-back-button default-href="/"></ion-back-button>
+          </ion-buttons>
+          <ion-title>Add New Location</ion-title>
         </ion-toolbar>
       </ion-header>
+  
+      <ion-content :fullscreen="true">
+        <ion-list>
+          <div v-for="(imageUrl, index) in newLocation.imageUrls" :key="index">
+            <img :src="imageUrl" />
+            <ion-button @click="() => removeImagePreview(index)">
+              <ion-icon slot="icon-only" :icon="trashOutline"></ion-icon>
+            </ion-button>
+          </div>
+  
+          <ion-item>
+            <ion-input type="text" v-model="newLocation.title" label="title"></ion-input>
+          </ion-item>
+  
+          <ion-item>
+            <ion-label position="floating">Description</ion-label>
+            <ion-textarea v-model="newLocation.description" label="Description"></ion-textarea>
+          </ion-item>
+  
+          <ion-item>
+            <ion-input type="text" v-model="newHashtagText" label="hashtag"></ion-input>
+            <ion-button slot="end" @click="addNewHashtag">
+              <ion-icon :icon="add"></ion-icon>
+            </ion-button>
+          </ion-item>
+  
+          <ion-item>
+            <ion-chip v-for="tag in newLocation.hashtags" :key="tag">{{ tag }}</ion-chip>
+          </ion-item>
+  
+          <ion-item>
+            <ion-input type="number" v-model="newLocation.latitude" label="latitude"></ion-input>
+          </ion-item>
+  
+          <ion-item>
+            <ion-input type="number" v-model="newLocation.longitude" label="longitude"></ion-input>
+          </ion-item>
 
+          <ion-button @click="triggerCamera" color="light">
+            Take a Photo 📸
+            <ion-icon slot="start" :icon="cameraOutline"></ion-icon>
+          </ion-button>
+  
+          <ion-button @click="postNewLocation" color="primary">
+            Post Location
+          </ion-button>
+        </ion-list>
+      </ion-content>
     </ion-page>
-</template>
+  </template>
+  
+  
+
+<style>
+</style>
