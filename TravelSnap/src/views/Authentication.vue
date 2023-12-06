@@ -30,7 +30,7 @@ const login = async () => {
         const user = await authService.login(userDetails.value.email, userDetails.value.password);
         const idToken = await user.getIdToken(/**foreceRefresh*/ true);
         localStorage.setItem("auth_token", idToken)
-        router.replace('/home');
+        router.replace('/tabs/home');
     } catch (error) {
         console.error(error);
     }
@@ -57,7 +57,7 @@ const googleLogin = async () => {
 
         if (token) {
             localStorage.setItem("auth_token", token);
-            router.replace('/home');
+            router.replace('/tabs/home');
         } else {
             console.error('No token received from Google sign-in.');
         }

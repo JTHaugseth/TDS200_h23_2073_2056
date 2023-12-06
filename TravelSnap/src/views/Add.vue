@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {
+  import {
   IonPage,
   IonHeader,
   IonToolbar,
@@ -10,20 +10,16 @@ import {
   IonLabel,
   IonToggle
 } from '@ionic/vue';
- </script>
+
+</script>
+
 <template>
     <ion-page>
       <ion-header>
         <ion-toolbar>
-          <ion-title>Settings</ion-title>
+          <ion-title>Add</ion-title>
         </ion-toolbar>
       </ion-header>
-    </ion-page>
-  </template>
-  
- 
 
-  <style>
-  /* Add your styling here */
-  </style>
-  
+    </ion-page>
+</template>

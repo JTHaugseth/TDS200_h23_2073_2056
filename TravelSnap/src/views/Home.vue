@@ -1,62 +1,75 @@
-<script setup lang="ts">
+ <script setup lang="ts">
 import { useRouter } from 'vue-router';
-import { IonButton, IonContent, IonInput, IonItem, IonLabel, IonList, IonListHeader, IonPage, IonToggle, IonTitle, IonIcon, IonRouterOutlet, toastController,  IonTabs, IonTabBar, IonTabButton } from '@ionic/vue';
-import { authService } from '@/service/firebase.authService';
+import { IonButton, IonContent, IonInput, IonItem, IonLabel, IonList, IonListHeader, IonPage, IonToggle, IonTitle, IonRouterOutlet, IonIcon, toastController } from '@ionic/vue';
+import { authService } from '@/service/firebase.authService'; 
+import { ref, computed } from 'vue';
 
 const router = useRouter();
 
-// Skriv kode her :) 
-</script>
 
+const value = ref(null); 
+const valueSet = computed(() => value.value !== null);
+
+const backgroundImage = computed(() => {
+  if (!valueSet.value) return ''; 
+});
+
+</script>
 
 <template>
   <ion-page>
-    <ion-tabs>
-      <ion-router-outlet></ion-router-outlet>
-      <ion-tab-bar slot="bottom">
-        <ion-tab-button tab="home">
-          <ion-icon name="home-outline"></ion-icon>
-        </ion-tab-button>
-
-        <ion-tab-button tab="profile">
-          <ion-icon name="person-outline"></ion-icon>
-        </ion-tab-button>
-
-        <ion-tab-button tab="add">
-          <ion-icon name="add-circle-outline"></ion-icon>
-        </ion-tab-button>
-
-        <ion-tab-button tab="settings">
-          <ion-icon name="settings-outline"></ion-icon>
-        </ion-tab-button>
-      </ion-tab-bar>
-    </ion-tabs>
+    <ion-content :style="{ backgroundImage: `url(${backgroundImage})` }">
+      <div v-if="!valueSet" class="loading-container">
+        
+      </div>
+      <div class="content-container">
+        <h1>This is the main view</h1>
+      </div>
+      <div class="icons-container">
+        <!-- Icons Here -->
+        <ion-icon name="heart-outline"></ion-icon>
+        <ion-icon name="earth-outline"></ion-icon>
+        <ion-icon name="chatbox-ellipses-outline"></ion-icon>
+      </div>
+      <div class="title-container">
+        <h2>Title Here</h2>
+      </div>
+    </ion-content>
   </ion-page>
 </template>
 
   
 <style>
-ion-tab-bar {
-  --background: transparent 
-  box-shadow: 0px -2px 5px rgba(0, 0, 0, 0.1); 
+.ion-content {
+  --background: none;
+  background-size: cover;
+  background-position: center;
 }
 
-
-ion-tab-button {
-  --color-selected: #ff4757;
-  --color: gray; 
-  transition: color 0.3s ease; 
+.icons-container {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-
-ion-icon {
-  font-size: 1.5em; 
+.icons-container ion-icon {
+  margin-bottom: 10px;
 }
 
+.title-container {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+}
 
-@media (max-width: 600px) {
-  ion-tab-button {
-    --padding-bottom: 12px; 
-  }
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
 }
 </style>

@@ -7,6 +7,7 @@ import { authService } from '@/service/firebase.authService';
 import Profile from '../views/Profile.vue';
 import Add from '../views/Add.vue';
 import Settings from '../views/Settings.vue';
+import NavigationTabs from '../views/NavigationTabs.vue';
 
 const parseJwt = (token:string) => {
   try {
@@ -50,28 +51,34 @@ const routes: Array<RouteRecordRaw> = [
     redirect: "/authentication",
   },
   {
-    path: "/home",
-    name: "Home",
-    component: Home,
-    beforeEnter: [authenticationRouteGuard]
-  },
-  {
-    path: "/profile",
-    name: "Profile",
-    component: Profile,
-    beforeEnter: [authenticationRouteGuard] 
-  },
-  {
-    path: "/add",
-    name: "Add",
-    component: Add,
-    beforeEnter: [authenticationRouteGuard] 
-  },
-  {
-    path: "/settings",
-    name: "Settings",
-    component: Settings,
-    beforeEnter: [authenticationRouteGuard] 
+    path: '/tabs/',
+    component: NavigationTabs,
+    children: [
+      {
+        path: '',
+        redirect: '/tabs/home',
+      },
+      {
+        path: 'home',
+        component: Home,
+        beforeEnter: [authenticationRouteGuard]
+      },
+      {
+        path: 'profile',
+        component: Profile,
+        beforeEnter: [authenticationRouteGuard]
+      },
+      {
+        path: 'add',
+        component: Add,
+        beforeEnter: [authenticationRouteGuard]
+      },
+      {
+        path: 'settings',
+        component: Settings,
+        beforeEnter: [authenticationRouteGuard]
+      }
+    ]
   },
   {
     path: "/authentication",
