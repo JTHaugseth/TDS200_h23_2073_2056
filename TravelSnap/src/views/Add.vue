@@ -84,9 +84,6 @@ const removeImagePreview = (index) => {
     <ion-page>
       <ion-header :translucent="true">
         <ion-toolbar>
-          <ion-buttons slot="start">
-            <ion-back-button default-href="/"></ion-back-button>
-          </ion-buttons>
           <ion-title>Add New Location</ion-title>
         </ion-toolbar>
       </ion-header>
@@ -101,36 +98,24 @@ const removeImagePreview = (index) => {
           </div>
   
           <ion-item>
-            <ion-input type="text" v-model="newLocation.title" label="title"></ion-input>
+            <ion-input type="text" v-model="newLocation.title" placeholder="title"></ion-input>
           </ion-item>
   
           <ion-item>
-            <ion-label position="floating">Description</ion-label>
-            <ion-textarea v-model="newLocation.description" label="Description"></ion-textarea>
+            <ion-textarea v-model="newLocation.description" placeholder="Description"></ion-textarea>
           </ion-item>
   
           <ion-item>
-            <ion-input type="text" v-model="newHashtagText" label="hashtag"></ion-input>
-            <ion-button slot="end" @click="addNewHashtag">
-              <ion-icon :icon="add"></ion-icon>
-            </ion-button>
+            <ion-input type="number" v-model="newLocation.latitude" placeholder="latitude"></ion-input>
           </ion-item>
   
           <ion-item>
-            <ion-chip v-for="tag in newLocation.hashtags" :key="tag">{{ tag }}</ion-chip>
-          </ion-item>
-  
-          <ion-item>
-            <ion-input type="number" v-model="newLocation.latitude" label="latitude"></ion-input>
-          </ion-item>
-  
-          <ion-item>
-            <ion-input type="number" v-model="newLocation.longitude" label="longitude"></ion-input>
+            <ion-input type="number" v-model="newLocation.longitude" placeh="longitude"></ion-input>
           </ion-item>
 
           <ion-button @click="triggerCamera" color="light">
-            Take a Photo 📸
-            <ion-icon slot="start" :icon="cameraOutline"></ion-icon>
+            Take a Photo  
+            <ion-icon name="camera"></ion-icon>
           </ion-button>
   
           <ion-button @click="postNewLocation" color="primary">
@@ -143,5 +128,52 @@ const removeImagePreview = (index) => {
   
   
 
-<style>
-</style>
+  <style>
+  ion-content {
+  --background: #202020;
+}
+
+  ion-page {
+    --ion-background-color: #202020;
+    --ion-text-color: #333;
+  }
+  
+  
+  ion-toolbar {
+    --padding-start: 20px;
+    --padding-end: 20px;
+  }
+  
+  ion-item {
+    --border-radius: 8px;
+    --padding-start: 20px;
+    --padding-end: 20px;
+    margin-bottom: 10px;
+  }
+  
+  ion-input, ion-textarea {
+    --color: #666;
+    --placeholder-color: #aaa;
+    --padding-start: 8px;
+    --padding-end: 8px;
+  }
+  
+  ion-button {
+    --border-radius: 4px;
+    --padding-vertical: 10px;
+    --padding-horizontal: 20px;
+    margin: 10px 0;
+  }
+  
+  img {
+    max-width: 100%;
+    height: auto;
+    margin-bottom: 10px;
+    border-radius: 8px;
+  }
+  
+  ion-icon {
+    --ionicon-stroke-width: 48px;
+  }
+  </style>
+  

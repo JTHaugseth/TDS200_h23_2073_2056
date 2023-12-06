@@ -15,8 +15,6 @@ const router = useRouter();
   <ion-page>
     <ion-content class="ion-padding">
       <div class="content-container">
-        <h1>This is the main view</h1>
-        <!-- Your main content goes here -->
       </div>
       <div class="icons-container">
         <!-- Icons Here -->
@@ -34,6 +32,11 @@ const router = useRouter();
 
   
 <style>
+
+ion-content {
+  --background: #202020;
+  color: white;
+}
 .icons-container {
   position: absolute;
   right: 10px;
@@ -42,6 +45,7 @@ const router = useRouter();
   display: flex;
   flex-direction: column;
   align-items: center;
+  color: white;
 }
 
 .icons-container ion-icon {
@@ -52,5 +56,6 @@ const router = useRouter();
   position: absolute;
   left: 10px;
   bottom: 10px;
+  color: white;
 }
 </style>
