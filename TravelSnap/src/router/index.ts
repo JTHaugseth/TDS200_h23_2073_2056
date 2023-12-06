@@ -4,6 +4,9 @@ import Home from '../views/Home.vue';
 import Authentication from '../views/Authentication.vue';
 import { toastController } from "@ionic/vue";
 import { authService } from '@/service/firebase.authService';
+import Profile from '../views/Profile.vue';
+import Add from '../views/Add.vue';
+import Settings from '../views/Settings.vue';
 
 const parseJwt = (token:string) => {
   try {
@@ -53,20 +56,36 @@ const routes: Array<RouteRecordRaw> = [
     beforeEnter: [authenticationRouteGuard]
   },
   {
+    path: "/profile",
+    name: "Profile",
+    component: Profile,
+    beforeEnter: [authenticationRouteGuard] 
+  },
+  {
+    path: "/add",
+    name: "Add",
+    component: Add,
+    beforeEnter: [authenticationRouteGuard] 
+  },
+  {
+    path: "/settings",
+    name: "Settings",
+    component: Settings,
+    beforeEnter: [authenticationRouteGuard] 
+  },
+  {
     path: "/authentication",
     name: "Authentication",
     component: Authentication,
   }
-]
+];
 
-// process.env.BASE_URL
-// import.meta.env.BASE_URL
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes
-})
+});
 
-export default router
+export default router;
 
 
 
