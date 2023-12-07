@@ -1,5 +1,5 @@
 import { getFirestore, collection, addDoc, doc, setDoc, getDoc } from "firebase/firestore";
-
+import { getStorage, ref, getDownloadURL } from "firebase/storage";
 
 export const firestoreService = {
 
@@ -27,6 +27,18 @@ export const firestoreService = {
       }
     } catch (error) {
       console.error("Error getting user profile:", error);
+      throw error;
+    }
+  },
+
+  async getDefaultProfilePicUrl() {
+    const storage = getStorage();
+    const defaultPicRef = ref(storage, 'default-profile-picture.JPG');
+    
+    try {
+      return await getDownloadURL(defaultPicRef);
+    } catch (error) {
+      console.error("Error getting default profile picture URL:", error);
       throw error;
     }
   },

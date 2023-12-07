@@ -35,8 +35,8 @@ const isActiveTab = (tabPath: string) => {
           </ion-tab-button>
   
           <ion-tab-button 
-            @click="navigateTo('/tabs/add')" 
-            :class="{ 'active-tab': isActiveTab('/tabs/add') }"
+            @click="navigateTo('/tabs/newpost')" 
+            :class="{ 'active-tab': isActiveTab('/tabs/newpost') }"
           >
             <ion-icon name="add-circle-outline"></ion-icon>
           </ion-tab-button>

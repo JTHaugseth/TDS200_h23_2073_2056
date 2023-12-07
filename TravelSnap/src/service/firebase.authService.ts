@@ -16,11 +16,13 @@ export const authService = {
     const userCredential = await createUserWithEmailAndPassword(getAuth(), email, password);
     const user = userCredential.user;
     if (user) {
+      const defaultProfilePicUrl = await firestoreService.getDefaultProfilePicUrl();
+  
       await firestoreService.createUserProfile(user.uid, {
         userID: user.uid,
         username: userName, 
         email: user.email,
-        profilePicture: '', 
+        profilePicture: defaultProfilePicUrl, 
         posts: [],
         likedPosts: []
       });
@@ -49,11 +51,13 @@ export const authService = {
       if (user) {
         const userProfile = await firestoreService.getUserProfile(user.uid);
         if (!userProfile) {
+          const defaultProfilePicUrl = await firestoreService.getDefaultProfilePicUrl(); 
+  
           await firestoreService.createUserProfile(user.uid, {
             userID: user.uid,
-            username: '', 
+            username: user.displayName || '', 
             email: user.email,
-            profilePicture: '', 
+            profilePicture: defaultProfilePicUrl, 
             posts: [],
             likedPosts: []
           });

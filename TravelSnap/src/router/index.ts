@@ -5,7 +5,7 @@ import Authentication from '../views/Authentication.vue';
 import { toastController } from "@ionic/vue";
 import { authService } from '@/service/firebase.authService';
 import Profile from '../views/Profile.vue';
-import Add from '../views/Add.vue';
+import NewPost from '../views/NewPost.vue';
 import Settings from '../views/Settings.vue';
 import NavigationTabs from '../views/NavigationTabs.vue';
 
@@ -69,8 +69,8 @@ const routes: Array<RouteRecordRaw> = [
         beforeEnter: [authenticationRouteGuard]
       },
       {
-        path: 'add',
-        component: Add,
+        path: 'newpost',
+        component: NewPost,
         beforeEnter: [authenticationRouteGuard]
       },
       {
