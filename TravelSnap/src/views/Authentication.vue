@@ -5,7 +5,6 @@ import { ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { getIdToken } from "firebase/auth";
 
-
 const router = useRouter();
 
 /* State */
@@ -15,6 +14,7 @@ const isPasswordMismatch = ref(false);
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
 const passwordStrength = ref({ message: '', color: '' });
+
 
 
 const userDetails = ref({
@@ -44,12 +44,13 @@ const register = async () => {
         } else {
             isPasswordMismatch.value = false;
         }
-        await authService.register(userDetails.value.email, userDetails.value.password);
+        await authService.register(userDetails.value.email, userDetails.value.password, userDetails.value.userName);
         await login();
     } catch (error) {
         console.log(error);
     }
 }
+
 
 const googleLogin = async () => {
     try {

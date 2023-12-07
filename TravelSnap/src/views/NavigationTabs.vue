@@ -68,7 +68,6 @@ const isActiveTab = (tabPath: string) => {
   
   .active-tab {
   color: var(--ion-color-success);
-  transform: scale(1.2);
 }
   
   ion-icon {

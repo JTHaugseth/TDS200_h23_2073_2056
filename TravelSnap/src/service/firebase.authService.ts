@@ -8,11 +8,24 @@ import {
   sendPasswordResetEmail
 } from "firebase/auth";
 
+import { firestoreService } from "./firebase.firestoreService";
+
 export const authService = {
   
-  async register(email: string, password: string) {
-    const userCredential = await createUserWithEmailAndPassword(getAuth(), email, password)
-    return userCredential?.user;
+  async register(email: string, password: string, userName: string) {
+    const userCredential = await createUserWithEmailAndPassword(getAuth(), email, password);
+    const user = userCredential.user;
+    if (user) {
+      await firestoreService.createUserProfile(user.uid, {
+        userID: user.uid,
+        username: userName, 
+        email: user.email,
+        profilePicture: '', 
+        posts: [],
+        likedPosts: []
+      });
+    }
+    return user;
   },
 
   async login(email: string, password: string) {
@@ -32,9 +45,23 @@ export const authService = {
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(getAuth(), provider);
-      const credential = GoogleAuthProvider.credentialFromResult(result);
-      const token = credential?.accessToken;
-      return token; // Return only the token
+      const user = result.user;
+      if (user) {
+        const userProfile = await firestoreService.getUserProfile(user.uid);
+        if (!userProfile) {
+          await firestoreService.createUserProfile(user.uid, {
+            userID: user.uid,
+            username: '', 
+            email: user.email,
+            profilePicture: '', 
+            posts: [],
+            likedPosts: []
+          });
+        }
+        const credential = GoogleAuthProvider.credentialFromResult(result);
+        const token = credential?.accessToken;
+        return token; 
+      }
     } catch (error) {
       console.error("Error during Google Sign-In:", error);
       return null;

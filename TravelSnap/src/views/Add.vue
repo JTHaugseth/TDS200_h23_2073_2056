@@ -137,6 +137,9 @@ const removeImagePreview = (index) => {
     --ion-background-color: #202020;
     --ion-text-color: #333;
   }
+  ion-list {
+    --ion-background-color: #202020;
+  }
   
   
   ion-toolbar {
