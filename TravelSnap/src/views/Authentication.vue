@@ -38,6 +38,10 @@ const login = async () => {
 
 const register = async () => {
     try {
+        if (userDetails.value.password.length < 6) {
+        console.error('Password must be at least 6 characters long.');
+        return;
+    }
         if (userDetails.value.password !== userDetails.value.confirmPassword) {
             isPasswordMismatch.value = true;
             return;
@@ -94,7 +98,7 @@ watch(
 const assessPasswordStrength = (password: string) => {
     let result = { message: '', color: '' };
     if (password.length < 6) {
-        result = { message: 'Weak password.', color: 'red' };
+        result = { message: 'Weak password. It needs atleast 6 characters.', color: 'red' };
     } else if (password.length < 10) {
         result = { message: 'Medium password.', color: 'yellow' };
     } else {

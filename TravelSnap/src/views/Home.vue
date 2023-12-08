@@ -31,7 +31,7 @@ const router = useRouter();
 
 
   
-<style>
+<style scoped>
 
 ion-content {
   --background: #202020;

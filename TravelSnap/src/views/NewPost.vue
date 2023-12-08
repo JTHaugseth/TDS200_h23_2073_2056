@@ -1,35 +1,39 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { 
-  IonBackButton, 
-  IonButton, 
-  IonChip, 
-  IonContent, 
-  IonHeader, 
-  IonIcon, 
-  IonInput, 
+import { ref, onMounted, nextTick } from 'vue';
+import {
+  IonBackButton,
+  IonButton,
+  IonChip,
+  IonContent,
+  IonHeader,
+  IonIcon,
+  IonInput,
   IonItem,
   IonGrid,
   IonRow,
-  IonCol, 
-  IonLabel, 
-  IonList, 
-  IonPage, 
-  IonTextarea, 
-  IonTitle, 
-  IonToolbar, 
-  toastController 
+  IonCol,
+  IonLabel,
+  IonList,
+  IonPage,
+  IonTextarea,
+  IonTitle,
+  IonToolbar,
+  toastController, IonItemSliding, IonItemOptions, IonItemOption
 } from '@ionic/vue';
+import { logoIonic } from 'ionicons/icons';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { Geolocation } from '@capacitor/geolocation';
+import { GoogleMap } from '@capacitor/google-maps';
 import { FirebaseStorage } from 'firebase/storage';
 import { addDoc, collection, getFirestore } from 'firebase/firestore';
 
 const title = ref('');
 const description = ref('');
 const image = ref<string | null>(null);
-const geopoint = ref(null);
+const geopoint = ref<{ lat: number; lng: number } | null>(null);
+const showMap = ref(false);
 const firestore = getFirestore();
+
 
 const selectImage = async () => {
   try {
@@ -53,9 +57,9 @@ const takePicture = async () => {
   try {
     const photo = await Camera.getPhoto({
       quality: 90,
-      allowEditing: false, 
+      allowEditing: false,
       resultType: CameraResultType.Uri,
-      source: CameraSource.Camera 
+      source: CameraSource.Camera
     });
 
     const imageUrl = photo.webPath ?? photo.path;
@@ -72,7 +76,70 @@ const removeImage = () => {
 };
 
 const getCurrentLocation = async () => {
-  // Code to get current geolocation
+  if (!geopoint.value) {
+    try {
+      const coordinates = await Geolocation.getCurrentPosition();
+      geopoint.value = {
+        lat: coordinates.coords.latitude,
+        lng: coordinates.coords.longitude
+      };
+    } catch (error) {
+      console.error('Error getting location:', error);
+    }
+  }
+
+  showMap.value = true;
+  nextTick(() => {
+    initMap();
+  });
+};
+
+
+
+const initMap = async () => {
+  let initialCenter = geopoint.value || { lat: 60.417, lng: 5.172 }; 
+
+  try {
+    const map = await GoogleMap.create({
+      id: 'map',
+      element: document.getElementById('map') || document.createElement('div'),
+      apiKey: 'AIzaSyCj3RlB_EBCnZ9Ax5Lg7OQhY95IuVZRrdc',
+      config: {
+        center: initialCenter,
+        zoom: 16,
+      },
+    });
+
+    let markerId = await map.addMarker({
+      coordinate: initialCenter,
+    });
+
+    map.setOnMapClickListener(async (location) => {
+      geopoint.value = {
+        lat: location.latitude,
+        lng: location.longitude,
+      };
+
+      console.log(geopoint.value)
+
+      if (markerId) {
+        await map.removeMarker(markerId);
+      }
+
+      markerId = await map.addMarker({
+        coordinate: {
+          lat: location.latitude,
+          lng: location.longitude,
+        },
+      });
+    });
+  } catch (error) {
+    console.error('Error creating map:', error);
+  }
+};
+
+const confirmLocation = () => {
+  showMap.value = false;
 };
 
 const submitPost = async () => {
@@ -86,98 +153,124 @@ onMounted(() => {
 
 <template>
   <ion-page>
-    <ion-header>
-      <ion-toolbar>
-        <ion-title>New Post</ion-title>
-      </ion-toolbar>
-    </ion-header>
-
     <ion-content class="ion-padding">
-      <ion-grid>
+      <ion-header collapse="condense">
+        <ion-toolbar>
+          <ion-title size="large">Create a post!</ion-title>
+        </ion-toolbar>
+      </ion-header>
 
-        <ion-row>
-          <ion-col size="5">
-            <ion-button expand="block" @click="takePicture" size="small">Take Picture</ion-button>
-          </ion-col>
-          <ion-col size="5">
-            <ion-button expand="block" @click="selectImage">Upload Image</ion-button>
-          </ion-col>
-        </ion-row>
+      <ion-list>
+        <ion-item>
+          <IonInput v-model="title" aria-label="title" placeholder="Title" color="dark"></IonInput>
+        </ion-item>
+        <ion-item>
+          <IonTextarea v-model="description" aria-label="Description" placeholder="Description"></IonTextarea>
+        </ion-item>
 
-        <ion-row>
-          <ion-col>
-            <ion-item>
-              <IonInput v-model="title" label="Title"></IonInput>
-            </ion-item>
-          </ion-col>
-        </ion-row>
-
-        <ion-row>
-          <ion-col>
-            <ion-item>
-              <IonTextarea v-model="description" label="Description"></IonTextarea>
-            </ion-item>
-          </ion-col>
-        </ion-row>
-
-        <ion-row>
-          <ion-col size="5">
-            <ion-button expand="block" @click="getCurrentLocation">Get Location</ion-button>
-          </ion-col>
-        </ion-row>
-
-        <ion-row>
-    <ion-col size="12">
-      <div v-if="image" class="image-container">
-        <img :src="image" />
-        <ion-button class="remove-image-button" @click="removeImage" color="danger">X</ion-button>
+        <ion-item>
+          <IonIcon name="image-outline" @click="selectImage" class="icon-style" aria-label="upload picture">
+          </IonIcon>
+          <IonIcon name="camera-outline" @click="takePicture" class="icon-style" aria-label="upload picture">
+          </IonIcon>
+          <IonIcon name="earth-outline" @click="getCurrentLocation" class="icon-style" aria-label="Get location">
+          </IonIcon>
+        </ion-item>
+        <ion-item v-if= "showMap">
+          <capacitor-google-map id="map"></capacitor-google-map>
+        </ion-item>
+      <ion-item v-if="image && !showMap" >
+        <div class="image-container">
+        <IonIcon name="trash" @click="removeImage" class="delete-icon"></IonIcon>
+          <img :src ="image || ''" />
       </div>
-    </ion-col>
-  </ion-row>
-
-        <ion-row>
-          <ion-col size="12">
-            <ion-button expand="block" @click="submitPost">Submit Post</ion-button>
-          </ion-col>
-        </ion-row>
-      </ion-grid>
+      </ion-item>
+      <ion-item v-if="showMap">
+        <ion-button @click="confirmLocation" size="small" class="confirm-location-flex">
+        Confirm Location
+      </ion-button>
+      </ion-item>
+      <ion-item v-if="!showMap">
+        <ion-button  size="small" @click="submitPost">Submit</ion-button>
+      </ion-item>
+      </ion-list>
     </ion-content>
   </ion-page>
 </template>
-  
-  <style scoped>
-
-  ion-toolbar {
-    --background: #202020;
-    box-shadow: 0px -2px 5px rgba(0, 0, 0, 0.1); 
-    border-bottom: 1px solid #ffffff;
-    color: var(--ion-color-success)
-  }
-
-  ion-button {
-    --background: var(--ion-color-success);
-    margin-top: 10px;
-  }
-
-  .image-container {
-    position: relative;
-    display: inline-block; /* or 'block' depending on your layout */
-  }
-
-  .image-container img {
-    width: 100%; /* Adjust as needed */
-    height: auto; /* Adjust as needed */
-  }
-
-  .remove-image-button {
-    position: absolute;
-    top: 0;
-    right: 0;
-    background-color: rgba(255, 0, 0, 0.7); /* Semi-transparent red background */
-    color: white;
-  }
 
   
-  
-  </style>
+<style scoped>
+ion-button {
+  --background: var(--ion-color-success);
+  padding-top: 0;
+  margin: 0;
+}
+
+ion-item {
+  margin: 0;
+  width: 100%;
+}
+
+ion-list {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+ion-page,
+ion-content {
+  --ion-background-color: #202020;
+  color: #FFFFFF;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+ion-item,
+ion-label,
+ion-button,
+ion-input,
+ion-textarea,
+ion-title {
+  --color: #ffffff;
+}
+
+.icon-style {
+  font-size: 24px;
+  color: var(--ion-color-primary);
+  margin: 5px;
+}
+
+.image-container {
+  position: relative;
+  display: inline-block;
+}
+
+.image-container img {
+  width: 100%;
+  height: auto;
+  margin: 0;
+  padding: 0;
+}
+
+.delete-icon {
+  position: absolute;
+  top: 0;
+  right: 0;
+  color: var(--ion-color-danger);
+  font-size: 30px;
+  cursor: pointer;
+}
+
+capacitor-google-map {
+  display: inline-block;
+  width: 275px;
+  height: 400px;
+}
+
+.confirm-location-button {
+  --background: var(--ion-color-primary);
+  margin-top: 10px;
+}
+</style>
   
