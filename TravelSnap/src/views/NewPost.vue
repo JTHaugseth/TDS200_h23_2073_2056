@@ -3,7 +3,6 @@ import { ref, onMounted } from 'vue';
 import { 
   IonBackButton, 
   IonButton, 
-  IonButtons, 
   IonChip, 
   IonContent, 
   IonHeader, 
@@ -89,9 +88,6 @@ onMounted(() => {
   <ion-page>
     <ion-header>
       <ion-toolbar>
-        <ion-buttons slot="start">
-          <IonBackButton />
-        </ion-buttons>
         <ion-title>New Post</ion-title>
       </ion-toolbar>
     </ion-header>
@@ -101,7 +97,7 @@ onMounted(() => {
 
         <ion-row>
           <ion-col size="5">
-            <ion-button expand="block" @click="takePicture">Take Picture</ion-button>
+            <ion-button expand="block" @click="takePicture" size="small">Take Picture</ion-button>
           </ion-col>
           <ion-col size="5">
             <ion-button expand="block" @click="selectImage">Upload Image</ion-button>
