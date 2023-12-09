@@ -31,6 +31,8 @@ const description = ref('');
 const image = ref<string | null>(null);
 const geopoint = ref<{ lat: number; lng: number } | null>(null);
 
+
+
 const selectImage = async () => {
   try {
     const photo = await Camera.getPhoto({
@@ -73,6 +75,7 @@ const removeImage = () => {
 
 const getCurrentLocation = async () => {
   console.log("getCurrentLocation called");
+  console.log("Current set geopoint: ", geopoint.value);
   try {
     const coordinates = await Geolocation.getCurrentPosition();
     geopoint.value = {

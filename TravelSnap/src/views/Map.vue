@@ -2,6 +2,7 @@
 import {
   IonBackButton,
   IonButton,
+  IonButtons,
   IonChip,
   IonContent,
   IonHeader,
@@ -110,7 +111,7 @@ const initMap = async () => {
         <ion-buttons slot="start">
           <ion-back-button default-href="/tabs/home" text="" color="primary"></ion-back-button>
         </ion-buttons>
-        <ion-title> Map </ion-title>
+        <ion-title> Where was the picture taken? </ion-title>
       </ion-toolbar>
     </ion-header>
 
