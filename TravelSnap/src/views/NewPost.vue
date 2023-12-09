@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, nextTick } from 'vue';
+import { ref } from 'vue';
 import {
   IonBackButton,
   IonButton,
@@ -20,20 +20,16 @@ import {
   IonToolbar,
   toastController, IonItemSliding, IonItemOptions, IonItemOption
 } from '@ionic/vue';
-import { logoIonic } from 'ionicons/icons';
+import { imageOutline, cameraOutline, earthOutline, trash } from 'ionicons/icons';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { Geolocation } from '@capacitor/geolocation';
-import { GoogleMap } from '@capacitor/google-maps';
-import { FirebaseStorage } from 'firebase/storage';
-import { addDoc, collection, getFirestore } from 'firebase/firestore';
+import { useRouter } from 'vue-router';
 
+const router = useRouter();
 const title = ref('');
 const description = ref('');
 const image = ref<string | null>(null);
 const geopoint = ref<{ lat: number; lng: number } | null>(null);
-const showMap = ref(false);
-const firestore = getFirestore();
-
 
 const selectImage = async () => {
   try {
@@ -76,79 +72,32 @@ const removeImage = () => {
 };
 
 const getCurrentLocation = async () => {
-  if (!geopoint.value) {
-    try {
-      const coordinates = await Geolocation.getCurrentPosition();
-      geopoint.value = {
-        lat: coordinates.coords.latitude,
-        lng: coordinates.coords.longitude
-      };
-    } catch (error) {
-      console.error('Error getting location:', error);
-    }
-  }
-
-  showMap.value = true;
-  nextTick(() => {
-    initMap();
-  });
-};
-
-
-
-const initMap = async () => {
-  let initialCenter = geopoint.value || { lat: 60.417, lng: 5.172 }; 
-
+  console.log("getCurrentLocation called");
   try {
-    const map = await GoogleMap.create({
-      id: 'map',
-      element: document.getElementById('map') || document.createElement('div'),
-      apiKey: 'AIzaSyCj3RlB_EBCnZ9Ax5Lg7OQhY95IuVZRrdc',
-      config: {
-        center: initialCenter,
-        zoom: 16,
-      },
-    });
+    const coordinates = await Geolocation.getCurrentPosition();
+    geopoint.value = {
+      lat: coordinates.coords.latitude,
+      lng: coordinates.coords.longitude
+    };
 
-    let markerId = await map.addMarker({
-      coordinate: initialCenter,
-    });
-
-    map.setOnMapClickListener(async (location) => {
-      geopoint.value = {
-        lat: location.latitude,
-        lng: location.longitude,
-      };
-
-      console.log(geopoint.value)
-
-      if (markerId) {
-        await map.removeMarker(markerId);
+    // Navigate to Map.vue with the return path and current geolocation
+    router.push({
+      path: '/map',
+      query: {
+        returnPath: '/tabs/newpost',
+        lat: geopoint.value.lat,
+        lng: geopoint.value.lng
       }
-
-      markerId = await map.addMarker({
-        coordinate: {
-          lat: location.latitude,
-          lng: location.longitude,
-        },
-      });
     });
   } catch (error) {
-    console.error('Error creating map:', error);
+    console.error('Error getting location:', error);
   }
-};
-
-const confirmLocation = () => {
-  showMap.value = false;
 };
 
 const submitPost = async () => {
   // Code to upload image to Firebase Storage and save post data to Firestore
 };
 
-onMounted(() => {
-  // Initialization code if needed
-});
 </script>
 
 <template>
@@ -169,30 +118,22 @@ onMounted(() => {
         </ion-item>
 
         <ion-item>
-          <IonIcon name="image-outline" @click="selectImage" class="icon-style" aria-label="upload picture">
+          <IonIcon :icon="imageOutline" @click="selectImage" class="icon-style" aria-label="upload picture">
           </IonIcon>
-          <IonIcon name="camera-outline" @click="takePicture" class="icon-style" aria-label="upload picture">
+          <IonIcon :icon="cameraOutline" @click="takePicture" class="icon-style" aria-label="upload picture">
           </IonIcon>
-          <IonIcon name="earth-outline" @click="getCurrentLocation" class="icon-style" aria-label="Get location">
+          <IonIcon :icon="earthOutline" @click="getCurrentLocation" class="icon-style" aria-label="Get location">
           </IonIcon>
         </ion-item>
-        <ion-item v-if= "showMap">
-          <capacitor-google-map id="map"></capacitor-google-map>
+        <ion-item v-if="image">
+          <div class="image-container">
+            <IonIcon :icon="trash" @click="removeImage" class="delete-icon"></IonIcon>
+            <img :src="image || ''" />
+          </div>
         </ion-item>
-      <ion-item v-if="image && !showMap" >
-        <div class="image-container">
-        <IonIcon name="trash" @click="removeImage" class="delete-icon"></IonIcon>
-          <img :src ="image || ''" />
-      </div>
-      </ion-item>
-      <ion-item v-if="showMap">
-        <ion-button @click="confirmLocation" size="small" class="confirm-location-flex">
-        Confirm Location
-      </ion-button>
-      </ion-item>
-      <ion-item v-if="!showMap">
-        <ion-button  size="small" @click="submitPost">Submit</ion-button>
-      </ion-item>
+        <ion-item>
+          <ion-button size="small" @click="submitPost">Submit</ion-button>
+        </ion-item>
       </ion-list>
     </ion-content>
   </ion-page>
@@ -260,12 +201,6 @@ ion-title {
   color: var(--ion-color-danger);
   font-size: 30px;
   cursor: pointer;
-}
-
-capacitor-google-map {
-  display: inline-block;
-  width: 275px;
-  height: 400px;
 }
 
 .confirm-location-button {

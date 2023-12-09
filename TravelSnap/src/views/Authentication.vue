@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { authService } from '@/service/firebase.authService';
 import { IonButton, IonContent, IonInput, IonItem, IonLabel, IonList, IonListHeader, IonPage, IonTitle, IonIcon } from '@ionic/vue';
+import { logoGoogle, eye, eyeOff } from 'ionicons/icons';
 import { ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { getIdToken } from "firebase/auth";
@@ -148,7 +149,7 @@ watch(() => userDetails.value.password, (newPassword) => {
                             v-model="userDetails.password" class="password-input">
                         </ion-input>
                         <ion-button class="show-password-button" @click="showPassword = !showPassword" fill="clear">
-                            <ion-icon :name="showPassword ? 'eye' : 'eye-off'"></ion-icon>
+                            <ion-icon :icon="showPassword ? eye : eyeOff"></ion-icon>
                         </ion-button>
                     </div>
                 </ion-item>
@@ -162,7 +163,7 @@ watch(() => userDetails.value.password, (newPassword) => {
                             v-model="userDetails.confirmPassword"></ion-input>
                         <ion-button class="show-password-button" @click="showConfirmPassword = !showConfirmPassword"
                             fill="clear">
-                            <ion-icon :name="showConfirmPassword ? 'eye' : 'eye-off'"></ion-icon>
+                            <ion-icon :icon="showConfirmPassword ? eye : eyeOff"></ion-icon>
                         </ion-button>
                     </div>
                 </ion-item>
@@ -200,7 +201,7 @@ watch(() => userDetails.value.password, (newPassword) => {
 
                 <ion-button v-if="!inForgotPasswordMode && !inRegisterMode" @click="googleLogin" class="button-google"
                     size="default">
-                    <ion-icon name="logo-google"> </ion-icon>
+                    <ion-icon :icon="logoGoogle"></ion-icon>
                 </ion-button>
 
                 <ion-item v-if="!inForgotPasswordMode && !inRegisterMode" lines="none">

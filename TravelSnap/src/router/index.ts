@@ -1,13 +1,14 @@
 import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { RouteRecordRaw, RouteLocationNormalized } from 'vue-router';
-import Home from '../views/Home.vue';
-import Authentication from '../views/Authentication.vue';
 import { toastController } from "@ionic/vue";
 import { authService } from '@/service/firebase.authService';
+import Home from '../views/Home.vue';
+import Authentication from '../views/Authentication.vue';
 import Profile from '../views/Profile.vue';
 import NewPost from '../views/NewPost.vue';
 import Settings from '../views/Settings.vue';
 import NavigationTabs from '../views/NavigationTabs.vue';
+import Map from '../views/Map.vue';
 
 const parseJwt = (token:string) => {
   try {
@@ -84,6 +85,11 @@ const routes: Array<RouteRecordRaw> = [
     path: "/authentication",
     name: "Authentication",
     component: Authentication,
+  },
+  {
+    path: '/map',
+    component: Map,
+    beforeEnter: [authenticationRouteGuard]
   }
 ];
 

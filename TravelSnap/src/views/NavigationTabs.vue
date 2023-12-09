@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { IonTabs, IonTabBar, IonTabButton, IonIcon, IonPage, IonRouterOutlet } from '@ionic/vue';
+import { homeOutline, personOutline, addCircleOutline, settingsOutline } from 'ionicons/icons';
 import { useRouter, useRoute } from 'vue-router';
 
 const router = useRouter();
@@ -24,28 +25,28 @@ const isActiveTab = (tabPath: string) => {
             @click="navigateTo('/tabs/home')" 
             :class="{ 'active-tab': isActiveTab('/tabs/home') }"
           >
-            <ion-icon name="home-outline"></ion-icon>
+            <ion-icon :icon="homeOutline"></ion-icon>
           </ion-tab-button>
   
           <ion-tab-button 
             @click="navigateTo('/tabs/profile')" 
             :class="{ 'active-tab': isActiveTab('/tabs/profile') }"
           >
-            <ion-icon name="person-outline"></ion-icon>
+            <ion-icon :icon="personOutline"></ion-icon>
           </ion-tab-button>
   
           <ion-tab-button 
             @click="navigateTo('/tabs/newpost')" 
             :class="{ 'active-tab': isActiveTab('/tabs/newpost') }"
           >
-            <ion-icon name="add-circle-outline"></ion-icon>
+            <ion-icon :icon="addCircleOutline"></ion-icon>
           </ion-tab-button>
   
           <ion-tab-button 
             @click="navigateTo('/tabs/settings')" 
             :class="{ 'active-tab': isActiveTab('/tabs/settings') }"
           >
-            <ion-icon name="settings-outline"></ion-icon>
+            <ion-icon :icon="settingsOutline"></ion-icon>
           </ion-tab-button>
         </ion-tab-bar>
       </ion-tabs>
@@ -68,16 +69,10 @@ const isActiveTab = (tabPath: string) => {
   
   .active-tab {
   color: var(--ion-color-success);
-}
+ }
   
-  ion-icon {
-    font-size: 2em; 
-  }
   
-  @media (max-width: 600px) {
-    ion-tab-button {
-      --padding-bottom: 12px; 
-    }
-  }
+  
+ 
   </style>
   

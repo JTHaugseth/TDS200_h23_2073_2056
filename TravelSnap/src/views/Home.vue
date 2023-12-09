@@ -1,6 +1,7 @@
  <script setup lang="ts">
 import { useRouter } from 'vue-router';
 import { IonButton, IonContent, IonInput, IonItem, IonLabel, IonList, IonListHeader, IonPage, IonToggle, IonTitle, IonRouterOutlet, IonIcon, toastController } from '@ionic/vue';
+import { heartOutline, earthOutline, chatboxEllipsesOutline } from 'ionicons/icons';
 import { authService } from '@/service/firebase.authService'; 
 
 
@@ -13,14 +14,14 @@ const router = useRouter();
 
 <template>
   <ion-page>
-    <ion-content class="ion-padding">
+    <ion-content>
       <div class="content-container">
       </div>
       <div class="icons-container">
         <!-- Icons Here -->
-        <ion-icon name="heart-outline"></ion-icon>
-        <ion-icon name="earth-outline"></ion-icon>
-        <ion-icon name="chatbox-ellipses-outline"></ion-icon>
+        <ion-icon :icon="heartOutline"></ion-icon>
+        <ion-icon :icon="earthOutline"></ion-icon>
+        <ion-icon :icon="chatboxEllipsesOutline"></ion-icon>
       </div>
       <div class="title-container">
         <h2>Title Here</h2>
