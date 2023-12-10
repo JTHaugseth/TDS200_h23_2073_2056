@@ -1,40 +1,27 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
 import {
-  IonBackButton,
   IonButton,
-  IonChip,
   IonContent,
   IonHeader,
   IonIcon,
   IonInput,
   IonItem,
-  IonGrid,
-  IonRow,
-  IonCol,
   IonLabel,
-  IonList,
   IonPage,
-  IonTextarea,
   IonTitle,
   IonToolbar,
-  toastController, IonItemSliding, IonItemOptions, IonItemOption
 } from '@ionic/vue';
+
+import { ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { imageOutline, cameraOutline, earthOutline, trash, heart, chatboxEllipsesOutline } from 'ionicons/icons';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { Geolocation } from '@capacitor/geolocation';
-import { useRouter } from 'vue-router';
-import { authService } from '@/service/firebase.authService';
-
 
 const router = useRouter();
-const user = authService.currentUser();
-
 const description = ref('');
 const image = ref<string | null>(null);
 const geopoint = ref<{ lat: number; lng: number } | null>(null);
-
-
 
 const selectImage = async () => {
   try {
@@ -70,10 +57,6 @@ const takePicture = async () => {
   } catch (error) {
     console.error('Error taking picture:', error);
   }
-};
-
-const removeImage = () => {
-  image.value = null;
 };
 
 const getCurrentLocation = async () => {
@@ -148,7 +131,7 @@ const submitPost = async () => {
             <div class="preview-overlay">
               <div class="overlay-content">
                 <h2 class="overlay-title">Preview Title</h2>
-                <p class="overlay-description">{{ description  }}</p>
+                <p class="overlay-description">{{ description }}</p>
               </div>
               <div class="overlay-icons">
                 <IonIcon :icon="earthOutline" aria-hidden="true"></IonIcon>
@@ -188,7 +171,7 @@ const submitPost = async () => {
       <hr>
 
       <ion-item class="item-input-container">
-          <IonInput v-model="description" placeholder="Description"></IonInput>
+        <IonInput v-model="description" placeholder="Description"></IonInput>
       </ion-item>
 
       <hr>
