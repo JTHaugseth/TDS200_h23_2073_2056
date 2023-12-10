@@ -1,31 +1,18 @@
 <script setup lang="ts">
 import {
   IonBackButton,
-  IonButton,
   IonButtons,
-  IonChip,
   IonContent,
   IonHeader,
-  IonIcon,
-  IonInput,
-  IonItem,
-  IonGrid,
-  IonRow,
-  IonCol,
-  IonLabel,
-  IonList,
   IonPage,
-  IonTextarea,
   IonTitle,
   IonToolbar,
-  toastController, IonItemSliding, IonItemOptions, IonItemOption
 } from '@ionic/vue';
 
-import { ref, onMounted, nextTick, watch } from 'vue';
+import { ref, onMounted, nextTick, onBeforeUnmount } from 'vue';
 import { GoogleMap } from '@capacitor/google-maps';
 import { useRouter } from 'vue-router';
 import { useRoute } from 'vue-router';
-import { logoIonic } from 'ionicons/icons';
 
 const router = useRouter();
 const route = useRoute();
@@ -35,14 +22,17 @@ const geopoint = ref<{ lat: number; lng: number } | null>(null);
 
 onMounted(async () => {
   console.log("Component mounted");
-  
-    
-      console.log("Before nextTick in watcher");
-      await nextTick();
-      console.log("After nextTick, before calling initMap");
-      await initMap();
-    
- 
+
+  console.log("Before nextTick in watcher");
+  await nextTick();
+  console.log("After nextTick, before calling initMap");
+  await initMap();
+});
+
+onBeforeUnmount(() => {
+  if (newMap) {
+    newMap.destroy();
+  }
 });
 
 const initMap = async () => {
@@ -97,36 +87,44 @@ const initMap = async () => {
   }
 };
 
+const confirmLocation = () => {
+  let finalLat = geopoint.value ? geopoint.value.lat : (route.query.lat ? parseFloat(route.query.lat as string) : 60.417);
+  let finalLng = geopoint.value ? geopoint.value.lng : (route.query.lng ? parseFloat(route.query.lng as string) : 5.172);
 
+  const returnPath = typeof route.query.returnPath === 'string' ? route.query.returnPath : '/tabs/newpost';
+  router.replace({
+    path: returnPath,
+    query: {
+      lat: finalLat.toString(),
+      lng: finalLng.toString()
+    }
+  });
+};
 
-
-// @click="confirmLocation"
 </script>
 
 <template>
-
-<ion-page>
+  <ion-page>
+    
     <ion-header>
       <ion-toolbar>
         <ion-buttons slot="start">
-          <ion-back-button default-href="/tabs/home" text="" color="primary"></ion-back-button>
+          <ion-back-button @click="confirmLocation" default-href="/tabs/home" text="" color="primary"></ion-back-button>
         </ion-buttons>
         <ion-title> Where was the picture taken? </ion-title>
       </ion-toolbar>
     </ion-header>
 
     <ion-content>
-        <capacitor-google-map ref="mapRef" style="display: inline-block; width: 100%; height: 100%"></capacitor-google-map>
+      <capacitor-google-map ref="mapRef" style="display: inline-block; width: 100%; height: 100%"></capacitor-google-map>
     </ion-content>
 
   </ion-page>
-   
 </template>
 
 
 
 <style scoped >
-
 capacitor-google-map {
   display: inline-block;
   width: 100%;
@@ -136,8 +134,5 @@ capacitor-google-map {
 ion-content {
   --background: transparent !important;
 }
-
-
-
 </style>
 

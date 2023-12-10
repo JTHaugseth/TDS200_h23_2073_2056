@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import {
   IonBackButton,
   IonButton,
@@ -76,14 +76,27 @@ const removeImage = () => {
 const getCurrentLocation = async () => {
   console.log("getCurrentLocation called");
   console.log("Current set geopoint: ", geopoint.value);
+
+  if (geopoint.value && geopoint.value.lat && geopoint.value.lng) {
+    router.push({
+      path: '/map',
+      query: {
+        returnPath: '/tabs/newpost',
+        lat: geopoint.value.lat,
+        lng: geopoint.value.lng
+      }
+    });
+    return;
+  }
+
   try {
     const coordinates = await Geolocation.getCurrentPosition();
     geopoint.value = {
       lat: coordinates.coords.latitude,
       lng: coordinates.coords.longitude
     };
+    console.log("New set geopoint: ", geopoint.value);
 
-    // Navigate to Map.vue with the return path and current geolocation
     router.push({
       path: '/map',
       query: {
@@ -96,6 +109,18 @@ const getCurrentLocation = async () => {
     console.error('Error getting location:', error);
   }
 };
+
+watch(() => router.currentRoute.value, (newRoute, oldRoute) => {
+  const lat = newRoute.query.lat;
+  const lng = newRoute.query.lng;
+
+  if (typeof lat === 'string' && typeof lng === 'string') {
+    geopoint.value = {
+      lat: parseFloat(lat),
+      lng: parseFloat(lng)
+    };
+  }
+});
 
 const submitPost = async () => {
   // Code to upload image to Firebase Storage and save post data to Firestore
