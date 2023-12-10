@@ -14,7 +14,7 @@ import {
 
 import { ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { imageOutline, cameraOutline, earthOutline, trash, heart, chatboxEllipsesOutline } from 'ionicons/icons';
+import { imageOutline, cameraOutline, earthOutline, heart, chatboxEllipsesOutline } from 'ionicons/icons';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { Geolocation } from '@capacitor/geolocation';
 
