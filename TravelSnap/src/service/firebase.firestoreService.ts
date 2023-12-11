@@ -1,4 +1,4 @@
-import { getFirestore, collection, addDoc, doc, setDoc, getDoc, serverTimestamp, GeoPoint } from "firebase/firestore";
+import { getFirestore, collection, addDoc, doc, setDoc, getDoc, serverTimestamp, GeoPoint, arrayUnion, getDocs, orderBy, query } from "firebase/firestore";
 import { getStorage, ref, getDownloadURL, uploadBytes } from "firebase/storage";
 
 export const firestoreService = {
@@ -63,5 +63,49 @@ export const firestoreService = {
       createdAt: serverTimestamp()
     });
     return postDocRef.id;
+  },
+
+  async addUserPost(userId: string, postId: string) {
+    const db = getFirestore();
+    const userDocRef = doc(db, "users", userId);
+
+    try {
+      await setDoc(userDocRef, {
+        posts: arrayUnion(postId)
+      }, { merge: true }); 
+    } catch (error) {
+      console.error("Error adding post to user:", error);
+      throw error;
+    }
+  },
+
+  async addCommentToPost(postId: string, userId: string, text: string) {
+    const db = getFirestore();
+    const commentsCollectionRef = collection(db, "posts", postId, "comments");
+  
+    try {
+      await addDoc(commentsCollectionRef, {
+        text: text,
+        commentedBy: userId,
+        createdAt: serverTimestamp()
+      });
+    } catch (error) {
+      console.error("Error adding comment to post:", error);
+      throw error;
+    }
+  },
+
+  async getCommentsForPost(postId: string) {
+    const db = getFirestore();
+    const commentsCollectionRef = collection(db, "posts", postId, "comments");
+    const commentsQuery = query(commentsCollectionRef, orderBy("createdAt", "desc"));
+  
+    try {
+      const querySnapshot = await getDocs(commentsQuery);
+      return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+      console.error("Error getting comments for post:", error);
+      throw error;
+    }
   },
 };

@@ -17,7 +17,6 @@ import { useRouter } from 'vue-router';
 import { imageOutline, cameraOutline, earthOutline, heart, chatboxEllipsesOutline } from 'ionicons/icons';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { Geolocation } from '@capacitor/geolocation';
-import { Filesystem, Directory } from '@capacitor/filesystem';
 import { authService } from '@/service/firebase.authService';
 import { firestoreService } from '@/service/firebase.firestoreService';
 
@@ -127,7 +126,6 @@ watch(() => router.currentRoute.value, (newRoute, oldRoute) => {
 });
 
 const submitPost = async () => {
-  // Validation checks
   if (!image.value) {
     alert("Please select an image.");
     return;
@@ -137,7 +135,7 @@ const submitPost = async () => {
     return;
   }
   if (!username.value || username.value.trim() === '') {
-    alert("Username is missing.");
+    alert("Username is missing. Please restart the app and try again.");
     return;
   }
   if (!geopoint.value || !geopoint.value.lat || !geopoint.value.lng) {
@@ -147,35 +145,17 @@ const submitPost = async () => {
 
   try {
     const currentUser = await authService.currentUser();
-    if (!currentUser || !image.value) throw new Error('User not logged in or image not selected');
+    if (!currentUser) throw new Error('User not logged in.');
 
-    let imageBlob;
-    if (image.value.startsWith('data:')) {
-      // Base64 string
-      const response = await fetch(image.value);
-      imageBlob = await response.blob();
-    } else {
-      // File path
-      const file = await Filesystem.readFile({
-        path: image.value,
-        directory: Directory.Data
-      });
-      imageBlob = new Blob([file.data], { type: 'image/jpeg' });
-    }
+    const response = await fetch(image.value);
+    const imageBlob = await response.blob();
+    const uploadedImageUrl = await firestoreService.uploadImageAndGetURL(currentUser.uid, new File([imageBlob], "post-image.jpg", { type: "image/jpeg" }));
+    
+    const postDocId = await firestoreService.createNewPost(currentUser.uid, username.value, description.value, uploadedImageUrl, { lat: geopoint.value.lat, lng: geopoint.value.lng });
 
-    const file = new File([imageBlob], `post-${new Date().toISOString()}.jpg`, { type: 'image/jpeg' });
+    await firestoreService.addUserPost(currentUser.uid, postDocId);
 
-    // Upload image and get URL
-    const imageUrl = await firestoreService.uploadImageAndGetURL(currentUser.uid, file);
-    // Create new post
-    await firestoreService.createNewPost(currentUser.uid, username.value, description.value, imageUrl, { lat: geopoint.value.lat, lng: geopoint.value.lng });
-
-    // Clear fields after posting and navigate or show success message
-    description.value = '';
-    image.value = null;
-    geopoint.value = null;
-
-    // e.g., router.push('/home');
+    router.push('/tabs/home');
   } catch (error) {
     console.error('Error submitting post:', error);
   }
