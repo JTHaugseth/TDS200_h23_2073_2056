@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { authService } from '@/service/firebase.authService';
 import { firestoreService } from "@/service/firebase.firestoreService";
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonItem, IonLabel, IonAvatar } from '@ionic/vue';
 
 const userProfile = ref(null);
 const userPosts = ref([]);
+const router = useRouter();
 
 const fetchUserProfile = async () => {
   const currentUser = await authService.currentUser();
@@ -19,6 +21,7 @@ onMounted(fetchUserProfile);
 
 const logout = async () => {
   await authService.logout();
+  router.push('/authentication'); 
 };
 </script>
 

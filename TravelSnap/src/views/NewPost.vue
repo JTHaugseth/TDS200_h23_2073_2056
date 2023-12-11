@@ -12,16 +12,34 @@ import {
   IonToolbar,
 } from '@ionic/vue';
 
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { imageOutline, cameraOutline, earthOutline, heart, chatboxEllipsesOutline } from 'ionicons/icons';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { Geolocation } from '@capacitor/geolocation';
+import { Filesystem, Directory } from '@capacitor/filesystem';
+import { authService } from '@/service/firebase.authService';
+import { firestoreService } from '@/service/firebase.firestoreService';
 
 const router = useRouter();
+const username = ref('');
 const description = ref('');
 const image = ref<string | null>(null);
 const geopoint = ref<{ lat: number; lng: number } | null>(null);
+
+onMounted(async () => {
+  try {
+    const currentUser = await authService.currentUser();
+    if (currentUser) {
+      const userProfile = await firestoreService.getUserProfile(currentUser.uid);
+      if (userProfile) {
+        username.value = userProfile.username;
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
+  }
+});
 
 const selectImage = async () => {
   try {
@@ -109,7 +127,58 @@ watch(() => router.currentRoute.value, (newRoute, oldRoute) => {
 });
 
 const submitPost = async () => {
-  // Code to upload image to Firebase Storage and save post data to Firestore
+  // Validation checks
+  if (!image.value) {
+    alert("Please select an image.");
+    return;
+  }
+  if (!description.value || description.value.trim() === '') {
+    alert("Please enter a description.");
+    return;
+  }
+  if (!username.value || username.value.trim() === '') {
+    alert("Username is missing.");
+    return;
+  }
+  if (!geopoint.value || !geopoint.value.lat || !geopoint.value.lng) {
+    alert("Please select a location.");
+    return;
+  }
+
+  try {
+    const currentUser = await authService.currentUser();
+    if (!currentUser || !image.value) throw new Error('User not logged in or image not selected');
+
+    let imageBlob;
+    if (image.value.startsWith('data:')) {
+      // Base64 string
+      const response = await fetch(image.value);
+      imageBlob = await response.blob();
+    } else {
+      // File path
+      const file = await Filesystem.readFile({
+        path: image.value,
+        directory: Directory.Data
+      });
+      imageBlob = new Blob([file.data], { type: 'image/jpeg' });
+    }
+
+    const file = new File([imageBlob], `post-${new Date().toISOString()}.jpg`, { type: 'image/jpeg' });
+
+    // Upload image and get URL
+    const imageUrl = await firestoreService.uploadImageAndGetURL(currentUser.uid, file);
+    // Create new post
+    await firestoreService.createNewPost(currentUser.uid, username.value, description.value, imageUrl, { lat: geopoint.value.lat, lng: geopoint.value.lng });
+
+    // Clear fields after posting and navigate or show success message
+    description.value = '';
+    image.value = null;
+    geopoint.value = null;
+
+    // e.g., router.push('/home');
+  } catch (error) {
+    console.error('Error submitting post:', error);
+  }
 };
 
 </script>
@@ -130,7 +199,7 @@ const submitPost = async () => {
             <img :src="image || ''" />
             <div class="preview-overlay">
               <div class="overlay-content">
-                <h2 class="overlay-title">Preview Title</h2>
+                <h2 class="overlay-title">{{ username }}</h2>
                 <p class="overlay-description">{{ description }}</p>
               </div>
               <div class="overlay-icons">
@@ -256,7 +325,7 @@ ion-title {
 }
 
 .overlay-title {
-  font-size: 1.5em;
+  font-size: 1.2em;
 }
 
 .overlay-description {

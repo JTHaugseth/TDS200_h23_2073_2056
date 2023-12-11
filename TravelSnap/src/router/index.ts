@@ -10,7 +10,7 @@ import Settings from '../views/Settings.vue';
 import NavigationTabs from '../views/NavigationTabs.vue';
 import Map from '../views/Map.vue';
 
-const parseJwt = (token:string) => {
+const parseJwt = (token: string) => {
   try {
     return JSON.parse(atob(token.split('.')[1]));
   } catch (error) {
@@ -20,36 +20,32 @@ const parseJwt = (token:string) => {
 
 const authenticationRouteGuard = async () => {
   const userAccessToken = localStorage.getItem("auth_token");
-    if (!userAccessToken) {
-      return { name: "Login" }
-    }
+  if (!userAccessToken) {
+    return { name: "Authentication" }
+  }
 
-    const jwtPayload = parseJwt(userAccessToken);
+  const jwtPayload = parseJwt(userAccessToken);
+  const userAccessTokenExpiresAt = jwtPayload?.exp as unknown as number;
 
-    const userAccessTokenExpiresAt = jwtPayload?.exp as unknown as number;
+  if (userAccessTokenExpiresAt < Date.now() / 1000) {
+    localStorage.removeItem("auth_token");
+    const errorToast = await toastController.create({
+      message: "User access token expired. Please log in again.",
+      duration: 3000,
+      color: "warning"
+    });
 
-    if (userAccessTokenExpiresAt < Date.now()/1000) {
-      // token expired
-      localStorage.removeItem("auth_token");
-      const errorToast = await toastController.create({
-        message: "Brukersesjon er utløpt – logg inn på nytt",
-        duration: 3000,
-        color: "warning"
-      });
+    await errorToast.present();
 
-      await errorToast.present();
-      
-      await authService.logout();
-      return { name: "Login" }
-    }
-  //}
-
+    await authService.logout();
+    return { name: "Authentication" }
+  }
 }
 
 const routes: Array<RouteRecordRaw> = [
   {
     path: "/",
-    redirect: "/authentication",
+    redirect: "/tabs/home",
   },
   {
     path: '/tabs/',
@@ -99,17 +95,3 @@ const router = createRouter({
 });
 
 export default router;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
