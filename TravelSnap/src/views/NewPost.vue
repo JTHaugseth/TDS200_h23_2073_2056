@@ -154,8 +154,11 @@ const submitPost = async () => {
     const postDocId = await firestoreService.createNewPost(currentUser.uid, username.value, description.value, uploadedImageUrl, { lat: geopoint.value.lat, lng: geopoint.value.lng });
 
     await firestoreService.addUserPost(currentUser.uid, postDocId);
-
-    router.push('/tabs/home');
+    router.push('/tabs/profile');
+    image.value = null;
+    description.value = '';
+    geopoint.value = null;
+    
   } catch (error) {
     console.error('Error submitting post:', error);
   }

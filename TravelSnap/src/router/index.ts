@@ -6,7 +6,6 @@ import Home from '../views/Home.vue';
 import Authentication from '../views/Authentication.vue';
 import Profile from '../views/Profile.vue';
 import NewPost from '../views/NewPost.vue';
-import Settings from '../views/Settings.vue';
 import NavigationTabs from '../views/NavigationTabs.vue';
 import Map from '../views/Map.vue';
 
@@ -68,11 +67,6 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: 'newpost',
         component: NewPost,
-        beforeEnter: [authenticationRouteGuard]
-      },
-      {
-        path: 'settings',
-        component: Settings,
         beforeEnter: [authenticationRouteGuard]
       }
     ]

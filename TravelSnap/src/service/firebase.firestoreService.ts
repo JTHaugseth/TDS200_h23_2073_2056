@@ -79,6 +79,59 @@ export const firestoreService = {
     }
   },
 
+  async getUserPosts(userId: string) {
+    const db = getFirestore();
+    try {
+      const userDocRef = doc(db, "users", userId);
+  
+      const docSnap = await getDoc(userDocRef);
+  
+      if (docSnap.exists()) {
+        const userData = docSnap.data();
+        const postIds = userData.posts || []; 
+        return postIds;
+      } else {
+        console.log("No such user document!");
+        return [];
+      }
+    } catch (error) {
+      console.error("Error getting user posts:", error);
+      throw error;
+    }
+  },
+
+  async getUserPostsImages(userId: string) {
+    const db = getFirestore();
+    try {
+      const userDocRef = doc(db, "users", userId);
+      const docSnap = await getDoc(userDocRef);
+  
+      if (docSnap.exists()) {
+        const userData = docSnap.data();
+        const postIds = userData.posts || [];
+        const imageUrls = [];
+  
+        for (const postId of postIds) {
+          const postDocRef = doc(db, "posts", postId);
+          const postDocSnap = await getDoc(postDocRef);
+          if (postDocSnap.exists()) {
+            imageUrls.push(postDocSnap.data().imageURL);
+          } else {
+            console.log(`No such post document for postId: ${postId}`);
+          }
+        }
+  
+        return imageUrls;
+      } else {
+        console.log("No such user document!");
+        return [];
+      }
+    } catch (error) {
+      console.error("Error getting user posts images:", error);
+      throw error;
+    }
+  },
+
   async addCommentToPost(postId: string, userId: string, text: string) {
     const db = getFirestore();
     const commentsCollectionRef = collection(db, "posts", postId, "comments");
@@ -105,6 +158,17 @@ export const firestoreService = {
       return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     } catch (error) {
       console.error("Error getting comments for post:", error);
+      throw error;
+    }
+  },
+
+  async getAllPosts() {
+    const db = getFirestore();
+    try {
+      const querySnapshot = await getDocs(collection(db, "posts"));
+      return querySnapshot.docs.map(doc => doc.data());
+    } catch (error) {
+      console.error("Error getting posts:", error);
       throw error;
     }
   },

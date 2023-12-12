@@ -17,62 +17,65 @@ const isActiveTab = (tabPath: string) => {
 
 
 <template>
-    <ion-page>
-      <ion-tabs>
-        <ion-router-outlet></ion-router-outlet>
-        <ion-tab-bar slot="bottom">
-          <ion-tab-button 
-            @click="navigateTo('/tabs/home')" 
-            :class="{ 'active-tab': isActiveTab('/tabs/home') }"
-          >
-            <ion-icon :icon="homeOutline"></ion-icon>
-          </ion-tab-button>
-  
-          <ion-tab-button 
-            @click="navigateTo('/tabs/profile')" 
-            :class="{ 'active-tab': isActiveTab('/tabs/profile') }"
-          >
-            <ion-icon :icon="personOutline"></ion-icon>
-          </ion-tab-button>
-  
-          <ion-tab-button 
-            @click="navigateTo('/tabs/newpost')" 
-            :class="{ 'active-tab': isActiveTab('/tabs/newpost') }"
-          >
-            <ion-icon :icon="addCircleOutline"></ion-icon>
-          </ion-tab-button>
-  
-          <ion-tab-button 
-            @click="navigateTo('/tabs/settings')" 
-            :class="{ 'active-tab': isActiveTab('/tabs/settings') }"
-          >
-            <ion-icon :icon="settingsOutline"></ion-icon>
-          </ion-tab-button>
-        </ion-tab-bar>
-      </ion-tabs>
-    </ion-page>
-  </template>
+  <ion-page>
+    <ion-tabs>
+      <ion-router-outlet></ion-router-outlet>
+      <ion-tab-bar slot="bottom">
+        <ion-tab-button 
+          @click="navigateTo('/tabs/home')" 
+          :class="{ 'active-tab': isActiveTab('/tabs/home') }">
+          <ion-icon :icon="homeOutline" size="small"></ion-icon>
+          <div v-if="isActiveTab('/tabs/home')" class="active-line"></div>
+        </ion-tab-button>
+
+        <ion-tab-button 
+          @click="navigateTo('/tabs/newpost')" 
+          :class="{ 'active-tab': isActiveTab('/tabs/newpost') }">
+          <ion-icon :icon="addCircleOutline" size="small"></ion-icon>
+          <div v-if="isActiveTab('/tabs/newpost')" class="active-line" ></div>
+        </ion-tab-button>
+
+        <ion-tab-button 
+          @click="navigateTo('/tabs/profile')" 
+          :class="{ 'active-tab': isActiveTab('/tabs/profile') }">
+          <ion-icon :icon="personOutline" size="small"></ion-icon>
+          <div v-if="isActiveTab('/tabs/profile')" class="active-line"></div>
+        </ion-tab-button>
+      </ion-tab-bar>
+    </ion-tabs>
+  </ion-page>
+</template>
+
   
   
   
 
-  <style scoped>
-  ion-tab-bar {
-    --background: #202020;
-    box-shadow: 0px -2px 5px rgba(0, 0, 0, 0.1); 
-  }
-  
-  ion-tab-button {
-    color: gray; 
-    transition: color 0.3s ease; 
-  }
-  
-  .active-tab {
+<style scoped>
+
+ion-tab-bar {
+  --background: #202020;
+  box-shadow: 0px -2px 5px rgba(0, 0, 0, 0.1); 
+}
+
+ion-tab-button {
+  position: relative;
+  color: gray; 
+  transition: color 0.3s ease; 
+}
+
+.active-tab {
   color: var(--ion-color-success);
- }
-  
-  
-  
- 
-  </style>
+}
+
+.active-line {
+  position: absolute;
+  bottom: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20%; /* Adjust the width as needed */
+  height: 2px; /* Adjust the thickness of the line */
+  background-color: var(--ion-color-success); /* Line color */
+}
+
+</style>
   
