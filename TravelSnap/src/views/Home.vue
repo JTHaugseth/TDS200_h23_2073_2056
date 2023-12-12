@@ -56,16 +56,17 @@ onMounted(async () => {
             <div class="post">
               <div class="image-container">
                 <img :src="post.imageURL"/>
+                <div class="overlay-icons">
+                    <IonIcon :icon="earthSharp" aria-hidden="true"></IonIcon>
+                    <IonIcon :icon="heart" aria-hidden="true"></IonIcon>
+                    <IonIcon :icon="chatboxEllipses" aria-hidden="true"></IonIcon>
+                  </div>
                 <div class="post-overlay">
                   <div class="overlay-content">
                     <h2 class="overlay-title">{{ post.username }}</h2>
                     <p class="overlay-description">{{ post.description }}</p>
                   </div>
-                  <div class="overlay-icons">
-                    <IonIcon :icon="earthSharp" aria-hidden="true"></IonIcon>
-                    <IonIcon :icon="heart" aria-hidden="true"></IonIcon>
-                    <IonIcon :icon="chatboxEllipses" aria-hidden="true"></IonIcon>
-                  </div>
+                  
                 </div>
               </div>
             </div>
@@ -152,13 +153,16 @@ ion-content {
 
 .overlay-icons {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+  flex-direction: column; /* Keep as column */
+  position: absolute;
+  top: 50%; /* Centralize vertically */
+  left: 90%; 
+  color: white;
 }
 
 .overlay-icons ion-icon {
-  font-size: 24px;
-  margin-bottom: 50%;
+  font-size: 30px;
+  margin-bottom: 40px;
 }
 
 .overlay-title {
