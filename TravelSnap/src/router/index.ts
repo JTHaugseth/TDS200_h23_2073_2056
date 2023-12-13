@@ -9,6 +9,9 @@ import NewPost from '../views/NewPost.vue';
 import NavigationTabs from '../views/NavigationTabs.vue';
 import Map from '../views/Map.vue';
 import ViewPost from '../views/ViewPost.vue';
+import SearchProfile from '../views/SearchProfile.vue';
+import SearchMap from '../views/SearchMap.vue';
+import SearchViewPost from '../views/SearchViewPost.vue';
 
 const parseJwt = (token: string) => {
   try {
@@ -86,7 +89,24 @@ const routes: Array<RouteRecordRaw> = [
     path: '/view-post',
     name: 'ViewPost',
     component: ViewPost,
-    props: true,
+    beforeEnter: [authenticationRouteGuard]
+  },
+  {
+    path: '/search-profile',
+    name: 'SearchProfile',
+    component: SearchProfile,
+    beforeEnter: [authenticationRouteGuard]
+  },
+  {
+    path: '/search-map',
+    name: 'SearchMap',
+    component: SearchMap,
+    beforeEnter: [authenticationRouteGuard]
+  },
+  {
+    path: '/search-view-post',
+    name: 'SearchViewPost',
+    component: SearchViewPost,
     beforeEnter: [authenticationRouteGuard]
   }
 ];

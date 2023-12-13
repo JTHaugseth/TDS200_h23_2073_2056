@@ -15,17 +15,23 @@ import {
 } from '@ionic/vue';
 
 import { ref, onMounted } from 'vue';
-import { earthSharp, heart, chatboxEllipses, close } from 'ionicons/icons';
+import { useRouter } from 'vue-router';
+import { earthSharp, heart, chatboxEllipses, close, trash } from 'ionicons/icons';
 import { firestoreService } from '@/service/firebase.firestoreService';
 import { authService } from '@/service/firebase.authService'; 
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import { Post } from '@/models/postInterface';
 import { UserProfile } from '@/models/userProfileInterface';
 import 'swiper/swiper-bundle.css';
+import { Comment } from '@/models/commentInterface';
 
+const router = useRouter();
 const posts = ref<Post[]>([]);
 const userProfile = ref<UserProfile | null>(null);
 const showCommentsSheet = ref(false);
+const currentPostId = ref('');
+const newCommentText = ref('');
+const comments = ref<Comment[]>([]);
 
 
 onMounted(async () => {
@@ -37,11 +43,42 @@ onMounted(async () => {
   }
 });
 
+const submitComment = async () => {
+  if (!newCommentText.value.trim()) return; 
+  const currentUser = await authService.currentUser();
+  if (currentUser && userProfile.value) {
+    try {
+      await firestoreService.createComment(
+        currentPostId.value,
+        currentUser.uid,
+        userProfile.value.username,
+        userProfile.value.profilePicture, 
+        newCommentText.value
+      );
+      newCommentText.value = ''; 
+      
+      let fetchedComments = await firestoreService.getCommentsByPostId(currentPostId.value);
+      comments.value = fetchedComments.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    } catch (error) {
+      console.error('Error submitting comment:', error);
+    }
+  }
+};
+
+const openCommentsSheet = async (postId: string) => {
+  currentPostId.value = postId;
+  let fetchedComments = await firestoreService.getCommentsByPostId(postId);
+  
+  comments.value = fetchedComments.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  showCommentsSheet.value = true;
+};
+
+
 const isLikedByCurrentUser = (postId: string) => {
   return userProfile.value?.likedPosts.includes(postId);
 };
 
-const toggleLike = async (post) => {
+const toggleLike = async (post: any) => {
   const currentUser = await authService.currentUser();
   if (currentUser && userProfile.value) {
     const userId = currentUser.uid;
@@ -62,14 +99,46 @@ const toggleLike = async (post) => {
   }
 };
 
+const deleteComment = async (commentId: string) => {
+  const currentUser = await authService.currentUser();
+  if (currentUser && currentPostId.value) {
+    try {
+      await firestoreService.deleteComment(currentPostId.value, commentId, currentUser.uid);
+      // Refresh comments to reflect the deletion
+      comments.value = await firestoreService.getCommentsByPostId(currentPostId.value);
+    } catch (error) {
+      console.error('Error deleting comment:', error);
+    }
+  }
+};
+
 const toggleCommentsSheet = () => {
   showCommentsSheet.value = !showCommentsSheet.value;
 };
+
+const openProfile = (id: string) => {
+  router.push({
+      path: '/search-profile',
+      query: {
+        userId: id,
+      }
+  })
+};
+
+const openMap = (geolocation: any) => {
+  router.push({
+    path: '/search-map',
+    query: {
+      lat: geolocation.latitude,
+      lng: geolocation.longitude,
+    }
+  });
+};
+
 </script>
 
 <template>
   <ion-page style="background-color: #202020;">
-    <ion-searchbar animated placeholder="Search for users"></ion-searchbar>
     
     <ion-content>
       <div class="center-wrapper">
@@ -80,7 +149,7 @@ const toggleCommentsSheet = () => {
               <div class="image-container">
                 <img :src="post.imageURL"/>
                 <div class="overlay-icons">
-                    <IonIcon :icon="earthSharp" aria-hidden="true"></IonIcon>
+                    <IonIcon :icon="earthSharp" @click="openMap(post.geolocation)" aria-hidden="true"></IonIcon>
                     <IonIcon 
                     :icon="heart" 
                     :style="{ color: isLikedByCurrentUser(post.id) ? 'red' : 'white' }" 
@@ -88,11 +157,11 @@ const toggleCommentsSheet = () => {
                     aria-hidden="true">
                   </IonIcon>
 
-                    <IonIcon :icon="chatboxEllipses" @click="toggleCommentsSheet" aria-hidden="true"></IonIcon>
+                    <IonIcon :icon="chatboxEllipses" @click="openCommentsSheet(post.id)" aria-hidden="true"></IonIcon>
                   </div>
                 <div class="post-overlay"> 
                   <div class="overlay-content">
-                    <h2 class="overlay-title">{{ post.username }}</h2>
+                    <h2 class="overlay-title" @click="openProfile(post.postedBy)">{{ post.username }}</h2>
                     <p class="overlay-description">{{ post.description }}</p>
                   </div>
                   
@@ -104,34 +173,33 @@ const toggleCommentsSheet = () => {
       </Swiper>
     </div>
     <IonModal :is-open="showCommentsSheet" swipe-to-close="true" class="custom-modal">
-          <!-- Your comments section goes here -->
-            <IonIcon :icon="close" @click="toggleCommentsSheet" class="close-button"/>
-            <div class="comments-container">
-              <img class="comment-avatar" src="default-image-url"  alt="Avatar" />
-              <div class="comment">
-                <h3 class="comment-name">Name</h3>
-                <p class="comment-text">Comment text</p>
-              </div>
+  <IonIcon :icon="close" @click="toggleCommentsSheet" class="close-button"/>
+  <div class="comments-container">
+    <div v-for="comment in comments" :key="comment.id" class="comment">
+      <img class="comment-avatar" :src="comment.userImage || 'default-image-url'"  alt="Avatar" />
+      <div>
+        <h3 class="comment-name">{{ comment.userName }}</h3>
+        <p class="comment-text">{{ comment.text }}</p>
       </div>
-      <div class="comment-input">
-        <IonInput placeholder="Add a comment..."/>
-        <IonButton color="medium" size="small">Send</IonButton>
-      </div>
-      </IonModal>
+      <IonIcon
+          v-if="comment.userId === userProfile?.userID"
+          :icon="trash"
+          @click="deleteComment(comment.id)"
+          class="delete-comment-icon"
+        ></IonIcon>
+    </div>
+  </div>
+  <div class="comment-input">
+    <IonInput v-model="newCommentText" :counter="true" :maxlength="100" placeholder="Add a comment..."/>
+    <IonButton color="medium" @click="submitComment" size="small">Send</IonButton>
+  </div>
+</IonModal>
+
     </ion-content>
   </ion-page>
 </template>
 
 <style scoped>
-
-
-
-ion-searchbar {
-  --background: #202020;
-  --color: #fff;
-  --border-color: transparent;
-  --box-shadow: none;
-}
 
 ion-content {
   --background: #202020;
@@ -237,20 +305,26 @@ ion-content {
 
 .comments-container {
   display: flex;
+  flex-direction: column; 
   align-items: flex-start; 
   padding: 10px;
+  overflow-y: auto; 
+  max-height: 70vh; 
 }
 
 .comment-avatar {
-  width: 40px; 
-  height: 40px;
+  width: 60px; 
+  height: 60px;
   border-radius: 50%; 
   margin-right: 10px;
 }
 
 .comment {
   display: flex;
-  flex-direction: column; 
+  align-items: center;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #ccc;
+  width: 100%;
 }
 
 .comment-name {
@@ -286,5 +360,11 @@ ion-content {
   flex-grow: 1; 
   margin-right: 10px; 
 }
+
+.delete-comment-icon {
+    color: #ffffff; 
+    margin-left: auto;
+    flex-shrink: 0;
+  }
 
 </style>

@@ -15,6 +15,7 @@ const isPasswordMismatch = ref(false);
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
 const passwordStrength = ref({ message: '', color: '' });
+const loginErrorMessage = ref('');
 
 
 
@@ -27,16 +28,32 @@ const userDetails = ref({
 });
 
 const login = async () => {
+    if (!userDetails.value.email || !userDetails.value.password) {
+        loginErrorMessage.value = 'Please enter both email and password';
+        return;
+    }
+
+    if (!isValidEmail(userDetails.value.email)) {
+        loginErrorMessage.value = 'Please enter a valid email address';
+        return;
+    }
+
     try {
         const user = await authService.login(userDetails.value.email, userDetails.value.password);
         const idToken = await user.getIdToken(/**foreceRefresh*/ true);
         localStorage.setItem("auth_token", idToken)
         router.replace('/tabs/home');
+        loginErrorMessage.value = ''; 
     } catch (error) {
-        console.error(error);
+        console.log(error);
+        loginErrorMessage.value = 'Incorrect email or password'; 
     }
 }
 
+function isValidEmail(email: string) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
 const register = async () => {
     try {
         if (userDetails.value.password.length < 6) {
@@ -125,7 +142,9 @@ watch(() => userDetails.value.password, (newPassword) => {
                     <ion-title v-else>Sign in</ion-title>
                 </ion-list-header>
 
-
+                <ion-label v-if="loginErrorMessage" class="login-error-message">
+                    {{ loginErrorMessage }}
+                </ion-label>
                 <ion-item v-if="inRegisterMode">
                     <div class="input-container">
                         <ion-input class="username-input" placeholder=" Username"
@@ -316,5 +335,12 @@ ion-input {
     font-size: 0.6rem;
     padding-top: 5px;
     margin-left: 4%;
+}
+
+.login-error-message {
+    color: red !important;
+    font-size: 0.8rem;
+    text-align: center;
+    padding-top: 10px;
 }
 </style>

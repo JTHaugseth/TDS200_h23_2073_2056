@@ -14,13 +14,12 @@ import {
 } from '@ionic/vue';
 
 import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { authService } from '@/service/firebase.authService';
 import { firestoreService } from "@/service/firebase.firestoreService";
-import { imagesOutline, heartOutline } from 'ionicons/icons';
+import { imagesOutline, heartOutline, arrowBack } from 'ionicons/icons';
 import { Post } from '@/models/postInterface';
 import { UserProfile } from '@/models/userProfileInterface';
-import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 
 const userProfile = ref<UserProfile | null>(null);
 const userPosts = ref<Post[]>([]);
@@ -29,78 +28,35 @@ const activeIcon = ref('posts');
 const isLoading = ref(true);
 
 const router = useRouter();
+const route = useRoute();
+const userId = route.query.userId;
 
 const fetchUserProfileAndPosts = async () => {
-  const currentUser = await authService.currentUser();
-  if (currentUser) {
-    userProfile.value = await firestoreService.getUserProfile(currentUser.uid) as UserProfile;
-    userPosts.value = await firestoreService.getUserPosts(currentUser.uid);
+  if (userId) {
+    userProfile.value = await firestoreService.getUserProfile(userId as string) as UserProfile;
+    userPosts.value = await firestoreService.getUserPosts(userId as string);
     isLoading.value = false;
   }
 };
 
 onMounted(fetchUserProfileAndPosts);
 
-const logout = async () => {
-  await authService.logout();
-  router.push('/authentication');
-};
-
 const showPostsGrid = () => {
   showPosts.value = true;
   activeIcon.value = 'posts';
 };
 
-const showLikes = () => {
-  showPosts.value = false;
-  activeIcon.value = 'likes';
-};
-
-const selectProfilePicture = async () => {
-  try {
-    const photo = await Camera.getPhoto({
-      quality: 90,
-      allowEditing: true,
-      resultType: CameraResultType.Uri,
-      source: CameraSource.Photos
-    });
-
-    const imageUrl = photo.webPath ?? photo.path;
-    if (imageUrl) {
-      uploadProfilePicture(imageUrl);
-    }
-  } catch (error) {
-    console.error('Error selecting profile picture:', error);
-  }
-};
-
-const uploadProfilePicture = async (imageUrl: string) => {
-  try {
-    const currentUser = await authService.currentUser();
-    if (!currentUser) throw new Error('User not logged in.');
-
-    const response = await fetch(imageUrl);
-    const imageBlob = await response.blob();
-    const uploadedImageUrl = await firestoreService.uploadProfilePictureAndGetURL(currentUser.uid, new File([imageBlob], "profile-picture.jpg", { type: "image/jpeg" }));
-    
-    await firestoreService.updateUserProfilePicture(currentUser.uid, uploadedImageUrl);
-    
-    if (userProfile.value) {
-      userProfile.value.profilePicture = uploadedImageUrl;
-    }
-
-  } catch (error) {
-    console.error('Error uploading profile picture:', error);
-  }
-};
-
 const openPost = (id: string) => {
   router.push({
-      path: '/view-post',
+      path: '/search-view-post',
       query: {
         postId: id,
       }
   })
+};
+
+const goBack = () => {
+  router.back();
 };
 
 </script>
@@ -108,23 +64,22 @@ const openPost = (id: string) => {
 <template>
   <ion-page>
     <ion-header>
-      <ion-toolbar>
-        <ion-title>Profile</ion-title>
-        <ion-button slot="end" size="small" class="profile-button" @click="logout">Logout</ion-button>
-      </ion-toolbar>
-    </ion-header>
+        <ion-toolbar>
+          <IonButton slot="start" fill="clear" @click="goBack">
+            <IonIcon :icon="arrowBack"></IonIcon>
+          </IonButton>
+          <ion-title>{{ userProfile?.username }}</ion-title>
+        </ion-toolbar>
+      </ion-header>
     <ion-content class="profile-content">
       <div class="profile-container">
         <ion-avatar class="avatar">
           <img :src="userProfile?.profilePicture || 'default-image-url'" alt="Profile Picture" />
         </ion-avatar>
         <div class="username-label">{{ userProfile?.username }}</div>
-        <IonButton size="small" class="profile-button" @click="selectProfilePicture">Edit profile picture</IonButton>
         <div class="overlay-icons">
           <IonIcon :icon="imagesOutline" @click="showPostsGrid" aria-label="Posts"
             :class="{ active: activeIcon === 'posts' }"></IonIcon>
-          <IonIcon :icon="heartOutline" @click="showLikes" aria-label="Liked Posts"
-            :class="{ active: activeIcon === 'likes' }"></IonIcon>
         </div>
       </div>
 
@@ -137,9 +92,6 @@ const openPost = (id: string) => {
           <div v-for="post in userPosts" :key="post.id" class="post-container">
               <img class="post-item" :src="post.imageURL" :alt="post.description" @click="openPost(post.id)" />
           </div>
-        </div>
-        <div v-else class="no-liked-posts-message">
-          No liked posts
         </div>
       </div>
     </ion-content>
@@ -182,13 +134,6 @@ ion-toolbar {
   font-size: 1.2em;
   text-align: center;
   color: white;
-}
-
-.logout-button {
-  --background: gray;
-  --border-radius: 5px;
-  --padding: 5px 10px;
-  font-size: 0.8em;
 }
 
 .posts-grid {
@@ -238,16 +183,7 @@ ion-toolbar {
 
 .overlay-icons ion-icon.active {
   border-bottom: 2px solid white;
-
 }
-
-.no-liked-posts-message {
-  color: white;
-  font-size: 1.5em;
-  text-align: center;
-  margin-top: 0px;
-}
-
 .profile-button {
   --background: rgba(255, 255, 255, 0.205);
 }
