@@ -8,6 +8,7 @@ import Profile from '../views/Profile.vue';
 import NewPost from '../views/NewPost.vue';
 import NavigationTabs from '../views/NavigationTabs.vue';
 import Map from '../views/Map.vue';
+import ViewPost from '../views/ViewPost.vue';
 
 const parseJwt = (token: string) => {
   try {
@@ -44,7 +45,7 @@ const authenticationRouteGuard = async () => {
 const routes: Array<RouteRecordRaw> = [
   {
     path: "/",
-    redirect: "/tabs/home",
+    redirect: "/authentication",
   },
   {
     path: '/tabs/',
@@ -79,6 +80,13 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/map',
     component: Map,
+    beforeEnter: [authenticationRouteGuard]
+  },
+  {
+    path: '/view-post',
+    name: 'ViewPost',
+    component: ViewPost,
+    props: true,
     beforeEnter: [authenticationRouteGuard]
   }
 ];

@@ -1,5 +1,6 @@
-import { getFirestore, collection, addDoc, doc, setDoc, getDoc, serverTimestamp, GeoPoint, arrayUnion, getDocs, orderBy, query } from "firebase/firestore";
+import { getFirestore, collection, addDoc, doc, setDoc, getDoc, serverTimestamp, GeoPoint, arrayUnion, getDocs, orderBy, query, where, arrayRemove  } from "firebase/firestore";
 import { getStorage, ref, getDownloadURL, uploadBytes } from "firebase/storage";
+import { Post } from "../models/postInterface";
 
 export const firestoreService = {
 
@@ -79,85 +80,55 @@ export const firestoreService = {
     }
   },
 
+
   async getUserPosts(userId: string) {
     const db = getFirestore();
     try {
-      const userDocRef = doc(db, "users", userId);
-  
-      const docSnap = await getDoc(userDocRef);
-  
-      if (docSnap.exists()) {
-        const userData = docSnap.data();
-        const postIds = userData.posts || []; 
-        return postIds;
-      } else {
-        console.log("No such user document!");
-        return [];
-      }
+      const postsQuery = query(collection(db, "posts"), where("postedBy", "==", userId));
+      const querySnapshot = await getDocs(postsQuery);
+      return querySnapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          createdAt: data.createdAt.toDate(), 
+          description: data.description,
+          geolocation: data.geolocation,
+          imageURL: data.imageURL,
+          likesCount: data.likesCount,
+          postedBy: data.postedBy,
+          username: data.username
+        } as Post; 
+      });
     } catch (error) {
       console.error("Error getting user posts:", error);
       throw error;
     }
   },
 
-  async getUserPostsImages(userId: string) {
+  async getPostById(postId: string) {
     const db = getFirestore();
     try {
-      const userDocRef = doc(db, "users", userId);
-      const docSnap = await getDoc(userDocRef);
+      const docRef = doc(db, "posts", postId);
+      const docSnap = await getDoc(docRef);
   
       if (docSnap.exists()) {
-        const userData = docSnap.data();
-        const postIds = userData.posts || [];
-        const imageUrls = [];
-  
-        for (const postId of postIds) {
-          const postDocRef = doc(db, "posts", postId);
-          const postDocSnap = await getDoc(postDocRef);
-          if (postDocSnap.exists()) {
-            imageUrls.push(postDocSnap.data().imageURL);
-          } else {
-            console.log(`No such post document for postId: ${postId}`);
-          }
-        }
-  
-        return imageUrls;
+        const data = docSnap.data();
+        return {
+          id: docSnap.id,
+          createdAt: data.createdAt.toDate(), 
+          description: data.description,
+          geolocation: data.geolocation,
+          imageURL: data.imageURL,
+          likesCount: data.likesCount,
+          postedBy: data.postedBy,
+          username: data.username
+        } as Post;
       } else {
-        console.log("No such user document!");
-        return [];
+        console.log("No such post!");
+        return null;
       }
     } catch (error) {
-      console.error("Error getting user posts images:", error);
-      throw error;
-    }
-  },
-
-  async addCommentToPost(postId: string, userId: string, text: string) {
-    const db = getFirestore();
-    const commentsCollectionRef = collection(db, "posts", postId, "comments");
-  
-    try {
-      await addDoc(commentsCollectionRef, {
-        text: text,
-        commentedBy: userId,
-        createdAt: serverTimestamp()
-      });
-    } catch (error) {
-      console.error("Error adding comment to post:", error);
-      throw error;
-    }
-  },
-
-  async getCommentsForPost(postId: string) {
-    const db = getFirestore();
-    const commentsCollectionRef = collection(db, "posts", postId, "comments");
-    const commentsQuery = query(commentsCollectionRef, orderBy("createdAt", "desc"));
-  
-    try {
-      const querySnapshot = await getDocs(commentsQuery);
-      return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    } catch (error) {
-      console.error("Error getting comments for post:", error);
+      console.error("Error getting post:", error);
       throw error;
     }
   },
@@ -166,9 +137,41 @@ export const firestoreService = {
     const db = getFirestore();
     try {
       const querySnapshot = await getDocs(collection(db, "posts"));
-      return querySnapshot.docs.map(doc => doc.data());
+      return querySnapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          createdAt: data.createdAt.toDate(), 
+          description: data.description,
+          geolocation: data.geolocation,
+          imageURL: data.imageURL,
+          likesCount: data.likesCount,
+          postedBy: data.postedBy,
+          username: data.username
+        } as Post; 
+      });
     } catch (error) {
       console.error("Error getting posts:", error);
+      throw error;
+    }
+  },
+  
+  async updateUserLikedPost(userId: string, postId: string, like: boolean) {
+    const db = getFirestore();
+    const userDocRef = doc(db, "users", userId);
+  
+    try {
+      if (like) {
+        await setDoc(userDocRef, {
+          likedPosts: arrayUnion(postId)
+        }, { merge: true });
+      } else {
+        await setDoc(userDocRef, {
+          likedPosts: arrayRemove(postId)
+        }, { merge: true });
+      }
+    } catch (error) {
+      console.error("Error updating user's liked posts:", error);
       throw error;
     }
   },

@@ -30,12 +30,13 @@ import './theme/variables.css';
 
 // Initialize Firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyDg9q7sLBYILH7ZEddUWPpaw-ySfF7LUOE",
-  authDomain: "travelsnap-21052.firebaseapp.com",
-  projectId: "travelsnap-21052",
-  storageBucket: "travelsnap-21052.appspot.com",  messagingSenderId: "257731131874",
-  appId: "1:257731131874:web:c472fb8abde3f2cca021bb",
-  measurementId: "G-SLEJ0FRCLF"
+  apiKey: "AIzaSyADgQlyUgG-GYuVkKnFJ5rZuzheW0zSvqk",
+  authDomain: "travelsnap-18f24.firebaseapp.com",
+  projectId: "travelsnap-18f24",
+  storageBucket: "travelsnap-18f24.appspot.com",
+  messagingSenderId: "1035399130439",
+  appId: "1:1035399130439:web:8a0037f28eafb2bf91b062",
+  measurementId: "G-Z77LXBB34C"
 };
 
 initializeApp(firebaseConfig)

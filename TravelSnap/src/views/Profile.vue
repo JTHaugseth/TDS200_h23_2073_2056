@@ -1,46 +1,69 @@
 <script setup lang="ts">
+import {
+  IonPage,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonContent,
+  IonButton,
+  IonItem,
+  IonLabel,
+  IonAvatar,
+  IonImg,
+  IonIcon
+} from '@ionic/vue';
+
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { authService } from '@/service/firebase.authService';
 import { firestoreService } from "@/service/firebase.firestoreService";
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonItem, IonLabel, IonAvatar, IonImg, IonIcon } from '@ionic/vue';
 import { imagesOutline, heartOutline } from 'ionicons/icons';
+import { Post } from '@/models/postInterface';
+import { UserProfile } from '@/models/userProfileInterface';
 
-const userProfile = ref(null);
-const userPostsImages = ref([]);
-const showPosts = ref(true); 
-const activeIcon = ref('posts'); 
+const userProfile = ref<UserProfile | null>(null);
+const userPosts = ref<Post[]>([]);
+const showPosts = ref(true);
+const activeIcon = ref('posts');
 const isLoading = ref(true);
 
 const router = useRouter();
 
-const fetchUserProfile = async () => {
+const fetchUserProfileAndPosts = async () => {
   const currentUser = await authService.currentUser();
   if (currentUser) {
-    userProfile.value = await firestoreService.getUserProfile(currentUser.uid);
-    userPostsImages.value = await firestoreService.getUserPostsImages(currentUser.uid);
-    isLoading.value = false; 
+    userProfile.value = await firestoreService.getUserProfile(currentUser.uid) as UserProfile;
+    userPosts.value = await firestoreService.getUserPosts(currentUser.uid);
+    isLoading.value = false;
   }
 };
 
-onMounted(fetchUserProfile);
+onMounted(fetchUserProfileAndPosts);
 
 const logout = async () => {
   await authService.logout();
-  router.push('/authentication'); 
+  router.push('/authentication');
 };
-
 
 const showPostsGrid = () => {
   showPosts.value = true;
   activeIcon.value = 'posts';
 };
 
-
 const showLikes = () => {
   showPosts.value = false;
   activeIcon.value = 'likes';
 };
+
+const openPost = (id: string) => {
+  router.push({
+      path: '/view-post',
+      query: {
+        postId: id,
+      }
+  })
+};
+
 </script>
 
 <template>
@@ -57,21 +80,23 @@ const showLikes = () => {
           <img :src="userProfile?.profilePicture || 'default-image-url'" alt="Profile Picture" />
         </ion-avatar>
         <div class="username-label">{{ userProfile?.username }}</div>
-        <IonButton size="small" class="profile-button">Edit profile</IonButton>
+        <IonButton size="small" class="profile-button">Edit profile picture</IonButton>
         <div class="overlay-icons">
-          <IonIcon :icon="imagesOutline" @click="showPostsGrid" aria-label="Posts" :class="{ active: activeIcon === 'posts' }"></IonIcon>
-          <IonIcon :icon="heartOutline" @click="showLikes" aria-label="Liked Posts" :class="{ active: activeIcon === 'likes' }"></IonIcon>
+          <IonIcon :icon="imagesOutline" @click="showPostsGrid" aria-label="Posts"
+            :class="{ active: activeIcon === 'posts' }"></IonIcon>
+          <IonIcon :icon="heartOutline" @click="showLikes" aria-label="Liked Posts"
+            :class="{ active: activeIcon === 'likes' }"></IonIcon>
         </div>
       </div>
-      
+
       <!-- Loading Spinner -->
       <div v-if="isLoading" class="loading-spinner"></div>
 
       <!-- Posts Grid or No Posts Message -->
       <div v-else>
         <div v-if="showPosts" class="posts-grid">
-          <div v-for="image in userPostsImages" :key="image" class="post-container">
-            <img class="post-item" :src="image" alt="User Post" />
+          <div v-for="post in userPosts" :key="post.id" class="post-container">
+              <img class="post-item" :src="post.imageURL" :alt="post.description" @click="openPost(post.id)" />
           </div>
         </div>
         <div v-else class="no-liked-posts-message">
@@ -84,15 +109,15 @@ const showLikes = () => {
 
 
 <style scoped>
-
 ion-content {
-  --background: #202020; 
+  --background: #202020;
 }
 
 ion-toolbar {
   --background: #202020;
   --color: white;
 }
+
 .profile-content {
   display: flex;
   flex-direction: column;
@@ -138,7 +163,7 @@ ion-toolbar {
 .post-container {
   width: 100%;
   height: 150px;
-  overflow: hidden; 
+  overflow: hidden;
   border-top: gray solid 1px;
   margin-top: 0px;
   animation: slideInFromLeft 0.5s ease-out forwards;
@@ -148,7 +173,7 @@ ion-toolbar {
   width: 100%;
   height: 100%;
   object-fit: cover;
-   
+
 }
 
 .overlay-icons ion-icon {
@@ -158,10 +183,10 @@ ion-toolbar {
 
 .overlay-icons {
   display: flex;
-  justify-content: space-around; 
-  align-items: center; 
+  justify-content: space-around;
+  align-items: center;
   width: 100%;
-  margin-top: 10px; 
+  margin-top: 10px;
   margin-bottom: 10px;
 }
 
@@ -174,7 +199,7 @@ ion-toolbar {
 
 .overlay-icons ion-icon.active {
   border-bottom: 2px solid white;
-  
+
 }
 
 .no-liked-posts-message {
@@ -185,14 +210,15 @@ ion-toolbar {
 }
 
 .profile-button {
-    --background: rgba(255, 255, 255, 0.205);
-  }
+  --background: rgba(255, 255, 255, 0.205);
+}
 
-  @keyframes slideInFromLeft {
+@keyframes slideInFromLeft {
   0% {
     transform: translateX(-100%);
     opacity: 0;
   }
+
   100% {
     transform: translateX(0);
     opacity: 1;
@@ -210,9 +236,13 @@ ion-toolbar {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-</style>
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}</style>
 
 
