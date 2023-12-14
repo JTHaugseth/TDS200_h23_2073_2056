@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { IonTabs, IonTabBar, IonTabButton, IonIcon, IonPage, IonRouterOutlet } from '@ionic/vue';
-import { homeOutline, personOutline, addCircleOutline, settingsOutline } from 'ionicons/icons';
+import { homeOutline, personOutline, addOutline, settingsOutline } from 'ionicons/icons';
 import { useRouter, useRoute } from 'vue-router';
 
 const router = useRouter();
@@ -31,7 +31,7 @@ const isActiveTab = (tabPath: string) => {
         <ion-tab-button 
           @click="navigateTo('/tabs/newpost')" 
           :class="{ 'active-tab': isActiveTab('/tabs/newpost') }">
-          <ion-icon :icon="addCircleOutline" size="small"></ion-icon>
+          <ion-icon :icon="addOutline" size="medium"></ion-icon>
           <div v-if="isActiveTab('/tabs/newpost')" class="active-line" ></div>
         </ion-tab-button>
 
@@ -69,12 +69,12 @@ ion-tab-button {
 
 .active-line {
   position: absolute;
-  bottom: 20%;
+  bottom: 15%;
   left: 50%;
   transform: translateX(-50%);
-  width: 20%; /* Adjust the width as needed */
-  height: 2px; /* Adjust the thickness of the line */
-  background-color: var(--ion-color-success); /* Line color */
+  width: 20%; 
+  height: 2px; 
+  background-color: var(--ion-color-success); 
 }
 
 </style>

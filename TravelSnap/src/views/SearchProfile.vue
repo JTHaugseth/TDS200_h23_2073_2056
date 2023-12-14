@@ -15,9 +15,8 @@ import {
 
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { authService } from '@/service/firebase.authService';
 import { firestoreService } from "@/service/firebase.firestoreService";
-import { imagesOutline, heartOutline, arrowBack } from 'ionicons/icons';
+import { imagesOutline, arrowBack } from 'ionicons/icons';
 import { Post } from '@/models/postInterface';
 import { UserProfile } from '@/models/userProfileInterface';
 
