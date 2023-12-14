@@ -2,15 +2,9 @@
 import {
   IonButton,
   IonContent,
-  IonHeader,
   IonIcon,
   IonInput,
-  IonItem,
-  IonLabel,
   IonPage,
-  IonTitle,
-  IonToolbar,
-  IonSearchbar,
   IonModal,
 } from '@ionic/vue';
 
@@ -33,7 +27,7 @@ const currentPostId = ref('');
 const newCommentText = ref('');
 const comments = ref<Comment[]>([]);
 
-
+// Fetch all posts except the ones created by the current user
 onMounted(async () => {
   const currentUser = await authService.currentUser(); 
   if (currentUser) {
@@ -43,6 +37,7 @@ onMounted(async () => {
   }
 });
 
+// Submit a comment to the current post
 const submitComment = async () => {
   if (!newCommentText.value.trim()) return; 
   const currentUser = await authService.currentUser();
@@ -65,6 +60,7 @@ const submitComment = async () => {
   }
 };
 
+// Open the comments sheet for a post
 const openCommentsSheet = async (postId: string) => {
   currentPostId.value = postId;
   let fetchedComments = await firestoreService.getCommentsByPostId(postId);
@@ -73,11 +69,12 @@ const openCommentsSheet = async (postId: string) => {
   showCommentsSheet.value = true;
 };
 
-
+// Check if the current user has liked a post
 const isLikedByCurrentUser = (postId: string) => {
   return userProfile.value?.likedPosts.includes(postId);
 };
 
+// Toggle the like status of a post
 const toggleLike = async (post: any) => {
   const currentUser = await authService.currentUser();
   if (currentUser && userProfile.value) {
@@ -99,6 +96,7 @@ const toggleLike = async (post: any) => {
   }
 };
 
+// Delete a comment
 const deleteComment = async (commentId: string) => {
   const currentUser = await authService.currentUser();
   if (currentUser && currentPostId.value) {
@@ -112,10 +110,12 @@ const deleteComment = async (commentId: string) => {
   }
 };
 
+// Toggle the comments sheet
 const toggleCommentsSheet = () => {
   showCommentsSheet.value = !showCommentsSheet.value;
 };
 
+// Open the profile of the user who created the post
 const openProfile = (id: string) => {
   router.push({
       path: '/search-profile',
@@ -125,6 +125,7 @@ const openProfile = (id: string) => {
   })
 };
 
+// Open the map view for a post
 const openMap = (geolocation: any) => {
   router.push({
     path: '/search-map',

@@ -14,34 +14,31 @@ import { GoogleMap } from '@capacitor/google-maps';
 import { useRouter } from 'vue-router';
 import { useRoute } from 'vue-router';
 
+
 const router = useRouter();
 const route = useRoute();
 const mapRef = ref<HTMLElement>();
 let newMap: GoogleMap;
 const geopoint = ref<{ lat: number; lng: number } | null>(null);
 
+// NextTick is used to wait for the DOM to be updated before calling initMap
 onMounted(async () => {
-  console.log("Component mounted");
-
-  console.log("Before nextTick in watcher");
   await nextTick();
-  console.log("After nextTick, before calling initMap");
   await initMap();
 });
 
+// Destroy the map when the component is unmounted
 onBeforeUnmount(() => {
   if (newMap) {
     newMap.destroy();
   }
 });
 
+// Initialize the map
 const initMap = async () => {
-  console.log("initMap called");
   if (!mapRef.value) {
-    console.log("mapRef is not available in DOM");
     return;
   }
-  console.log("mapRef is available, proceeding with map initialization");
 
   let initialLat = route.query.lat ? parseFloat(route.query.lat as string) : 60.417;
   let initialLng = route.query.lng ? parseFloat(route.query.lng as string) : 5.172;
@@ -87,6 +84,7 @@ const initMap = async () => {
   }
 };
 
+// Confirm the location and return to the previous view
 const confirmLocation = () => {
   let finalLat = geopoint.value ? geopoint.value.lat : (route.query.lat ? parseFloat(route.query.lat as string) : 60.417);
   let finalLng = geopoint.value ? geopoint.value.lng : (route.query.lng ? parseFloat(route.query.lng as string) : 5.172);

@@ -1,17 +1,5 @@
 <script setup lang="ts">
-import {
-  IonButton,
-  IonContent,
-  IonHeader,
-  IonIcon,
-  IonInput,
-  IonItem,
-  IonLabel,
-  IonPage,
-  IonTitle,
-  IonToolbar,
-} from '@ionic/vue';
-
+import {IonButton, IonContent, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonPage, IonTitle, IonToolbar} from '@ionic/vue';
 import { ref, watch, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { imageOutline, cameraOutline, earthOutline, heart, chatboxEllipsesOutline } from 'ionicons/icons';
@@ -26,6 +14,7 @@ const description = ref('');
 const image = ref<string | null>(null);
 const geopoint = ref<{ lat: number; lng: number } | null>(null);
 
+// Get current user profile
 onMounted(async () => {
   try {
     const currentUser = await authService.currentUser();
@@ -40,6 +29,7 @@ onMounted(async () => {
   }
 });
 
+// Select image from gallery
 const selectImage = async () => {
   try {
     const photo = await Camera.getPhoto({
@@ -58,6 +48,7 @@ const selectImage = async () => {
   }
 };
 
+// Take picture with camera
 const takePicture = async () => {
   try {
     const photo = await Camera.getPhoto({
@@ -76,10 +67,8 @@ const takePicture = async () => {
   }
 };
 
+// Get current location
 const getCurrentLocation = async () => {
-  console.log("getCurrentLocation called");
-  console.log("Current set geopoint: ", geopoint.value);
-
   if (geopoint.value && geopoint.value.lat && geopoint.value.lng) {
     router.push({
       path: '/map',
@@ -98,7 +87,6 @@ const getCurrentLocation = async () => {
       lat: coordinates.coords.latitude,
       lng: coordinates.coords.longitude
     };
-    console.log("New set geopoint: ", geopoint.value);
 
     router.push({
       path: '/map',
@@ -113,6 +101,7 @@ const getCurrentLocation = async () => {
   }
 };
 
+// Watch for changes in the route
 watch(() => router.currentRoute.value, (newRoute, oldRoute) => {
   const lat = newRoute.query.lat;
   const lng = newRoute.query.lng;
@@ -125,6 +114,7 @@ watch(() => router.currentRoute.value, (newRoute, oldRoute) => {
   }
 });
 
+// Submit post
 const submitPost = async () => {
   if (!image.value) {
     alert("Please select an image.");
@@ -179,7 +169,10 @@ const submitPost = async () => {
       <div class="preview-container">
         <div class="preview">
           <div class="image-container">
-            <img :src="image || ''" />
+            <img v-if="image" :src="image" />
+        <div v-else class="upload-message">
+          Upload or take a picture to preview it
+        </div>
             <div class="preview-overlay">
               <div class="overlay-content">
                 <h2 class="overlay-title">{{ username }}</h2>
@@ -241,7 +234,6 @@ const submitPost = async () => {
 
   
 <style scoped>
-/* CSS for background and title */
 ion-content {
   --background: #202020;
 }
@@ -255,7 +247,6 @@ ion-title {
   text-align: center;
 }
 
-/* CSS for preview */
 .preview-container {
   display: flex;
   justify-content: center;
@@ -358,7 +349,7 @@ ion-item.geopoint-display {
 
 .coordinates ion-label {
   display: block;
-  color: #a56a3a;
+  color: #ffffff;
 }
 
 /* Description input field */
@@ -388,6 +379,13 @@ ion-item.item-button-container {
 ion-button.submit-button {
   --background: var(--ion-color-success);
   font-size: large;
+}
+
+.upload-message {
+  color: white;
+  font-size: 1.2em;
+  text-align: center;
+  padding: 20px;
 }
 </style>
   

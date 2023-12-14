@@ -20,28 +20,24 @@ const route = useRoute();
 const mapRef = ref<HTMLElement>();
 let newMap: GoogleMap;
 
+// NextTick is used to wait for the DOM to be updated before calling initMap
 onMounted(async () => {
-  console.log("Component mounted");
-
-  console.log("Before nextTick in watcher");
   await nextTick();
-  console.log("After nextTick, before calling initMap");
   await initMap();
 });
 
+// Destroy the map when the component is unmounted
 onBeforeUnmount(() => {
   if (newMap) {
     newMap.destroy();
   }
 });
 
+// Initialize the map
 const initMap = async () => {
-  console.log("initMap called");
   if (!mapRef.value) {
-    console.log("mapRef is not available in DOM");
     return;
   }
-  console.log("mapRef is available, proceeding with map initialization");
 
   let initialLat = route.query.lat ? parseFloat(route.query.lat as string) : 60.417;
   let initialLng = route.query.lng ? parseFloat(route.query.lng as string) : 5.172;
@@ -68,6 +64,7 @@ const initMap = async () => {
   }
 };
 
+// Routes you back to the previous view
 const goBack = () => {
   router.back();
 };

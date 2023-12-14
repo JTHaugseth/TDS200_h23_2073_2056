@@ -4,7 +4,6 @@ import { IonButton, IonContent, IonInput, IonItem, IonLabel, IonList, IonListHea
 import { logoGoogle, eye, eyeOff } from 'ionicons/icons';
 import { ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { getIdToken } from "firebase/auth";
 
 const router = useRouter();
 
@@ -18,7 +17,7 @@ const passwordStrength = ref({ message: '', color: '' });
 const loginErrorMessage = ref('');
 
 
-
+/* Data */
 const userDetails = ref({
     id: '',
     userName: '',
@@ -27,6 +26,7 @@ const userDetails = ref({
     confirmPassword: ''
 });
 
+// Login
 const login = async () => {
     if (!userDetails.value.email || !userDetails.value.password) {
         loginErrorMessage.value = 'Please enter both email and password';
@@ -43,23 +43,26 @@ const login = async () => {
         const idToken = await user.getIdToken(/**foreceRefresh*/ true);
         localStorage.setItem("auth_token", idToken)
         router.replace('/tabs/home');
-        loginErrorMessage.value = ''; 
+        loginErrorMessage.value = '';
     } catch (error) {
         console.log(error);
-        loginErrorMessage.value = 'Incorrect email or password'; 
+        loginErrorMessage.value = 'Incorrect email or password';
     }
 }
 
+// Check if email is valid
 function isValidEmail(email: string) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
 }
+
+// Registers a new user
 const register = async () => {
     try {
         if (userDetails.value.password.length < 6) {
-        console.error('Password must be at least 6 characters long.');
-        return;
-    }
+            console.error('Password must be at least 6 characters long.');
+            return;
+        }
         if (userDetails.value.password !== userDetails.value.confirmPassword) {
             isPasswordMismatch.value = true;
             return;
@@ -73,7 +76,7 @@ const register = async () => {
     }
 }
 
-
+// Google login
 const googleLogin = async () => {
     try {
         const token = await authService.signinWithGoogle();
@@ -89,6 +92,7 @@ const googleLogin = async () => {
     }
 }
 
+// Forgot password
 const forgotPassword = async () => {
     try {
         await authService.resetPassword(userDetails.value.email);
@@ -98,14 +102,17 @@ const forgotPassword = async () => {
     }
 }
 
+// Toggles the forgot password mode
 const toggleForgotPassword = async () => {
     inForgotPasswordMode.value = !inForgotPasswordMode.value;
 }
 
+// Toggles the register mode
 const toggleRegisterMode = () => {
     inRegisterMode.value = !inRegisterMode.value;
 };
 
+// Password mismatch
 watch(
     () => [userDetails.value.password, userDetails.value.confirmPassword],
     ([newPassword, newConfirmPassword]) => {
@@ -113,6 +120,7 @@ watch(
     }
 );
 
+// Assess password strength
 const assessPasswordStrength = (password: string) => {
     let result = { message: '', color: '' };
     if (password.length < 6) {
@@ -125,6 +133,7 @@ const assessPasswordStrength = (password: string) => {
     return result;
 };
 
+// Password strength
 watch(() => userDetails.value.password, (newPassword) => {
     passwordStrength.value = assessPasswordStrength(newPassword);
 });

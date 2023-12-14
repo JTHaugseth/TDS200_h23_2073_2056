@@ -21,6 +21,7 @@ const parseJwt = (token: string) => {
   }
 };
 
+// Authentication guard for our routes. If the user is not authenticated, redirect to the Authentication page.
 const authenticationRouteGuard = async () => {
   const userAccessToken = localStorage.getItem("auth_token");
   if (!userAccessToken) {

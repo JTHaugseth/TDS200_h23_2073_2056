@@ -1,18 +1,5 @@
 <script setup lang="ts">
-import {
-  IonPage,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
-  IonContent,
-  IonButton,
-  IonItem,
-  IonLabel,
-  IonAvatar,
-  IonImg,
-  IonIcon
-} from '@ionic/vue';
-
+import {IonPage,IonHeader,IonToolbar,IonTitle,IonContent,IonButton,IonAvatar,IonImg,IonIcon} from '@ionic/vue';
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { firestoreService } from "@/service/firebase.firestoreService";
@@ -30,6 +17,7 @@ const router = useRouter();
 const route = useRoute();
 const userId = route.query.userId;
 
+//Fetches the userprofile and posts
 const fetchUserProfileAndPosts = async () => {
   if (userId) {
     userProfile.value = await firestoreService.getUserProfile(userId as string) as UserProfile;
@@ -40,11 +28,14 @@ const fetchUserProfileAndPosts = async () => {
 
 onMounted(fetchUserProfileAndPosts);
 
+//Shows the post depending if the posticon is active
 const showPostsGrid = () => {
   showPosts.value = true;
   activeIcon.value = 'posts';
 };
 
+
+// Routes you to the post
 const openPost = (id: string) => {
   router.push({
       path: '/search-view-post',
@@ -53,7 +44,7 @@ const openPost = (id: string) => {
       }
   })
 };
-
+// Routes you back to the previous view
 const goBack = () => {
   router.back();
 };
@@ -81,11 +72,7 @@ const goBack = () => {
             :class="{ active: activeIcon === 'posts' }"></IonIcon>
         </div>
       </div>
-
-      <!-- Loading Spinner -->
       <div v-if="isLoading" class="loading-spinner"></div>
-
-      <!-- Posts Grid or No Posts Message -->
       <div v-else>
         <div v-if="showPosts" class="posts-grid">
           <div v-for="post in userPosts" :key="post.id" class="post-container">
@@ -217,6 +204,7 @@ ion-toolbar {
   100% {
     transform: rotate(360deg);
   }
-}</style>
+}
+</style>
 
 

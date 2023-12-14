@@ -1,15 +1,17 @@
 <script setup lang="ts">
 import { IonTabs, IonTabBar, IonTabButton, IonIcon, IonPage, IonRouterOutlet } from '@ionic/vue';
-import { homeOutline, personOutline, addOutline, settingsOutline } from 'ionicons/icons';
+import { homeOutline, personOutline, addOutline } from 'ionicons/icons';
 import { useRouter, useRoute } from 'vue-router';
 
 const router = useRouter();
 const route = useRoute();
 
+// Routes to path
 const navigateTo = (path: string) => {
   router.replace(path);
 };
 
+// Checks if the tab is active
 const isActiveTab = (tabPath: string) => {
   return route.path.startsWith(tabPath);
 };

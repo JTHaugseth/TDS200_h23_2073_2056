@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { IonButton, IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonIcon } from '@ionic/vue';
 import { ref, onMounted } from 'vue';
-import { heart, earthSharp, chatboxEllipses, arrowBack } from 'ionicons/icons';
+import { arrowBack } from 'ionicons/icons';
 import { useRoute, useRouter } from 'vue-router';
 import { Post } from '@/models/postInterface';
 import { firestoreService } from "@/service/firebase.firestoreService";
@@ -12,12 +12,15 @@ const router = useRouter();
 const postId = route.query.postId;
 const post = ref<Post | null>(null);
 
+
+//Get post by id
 onMounted(async () => {
   if (postId) {
     post.value = await firestoreService.getPostById(postId as string);
   }
 });
 
+//Routes you back to the prev view
 const goBack = () => {
   router.back();
 };
@@ -39,16 +42,11 @@ const goBack = () => {
             <div class="post">
               <div class="image-container">
                 <img :src="post?.imageURL"/>
-                <div class="overlay-icons">
-                    <IonIcon :icon="earthSharp" aria-hidden="true"></IonIcon>
-                    <IonIcon :icon="chatboxEllipses" aria-hidden="true"></IonIcon>
-                  </div>
                 <div class="post-overlay">
                   <div class="overlay-content">
                     <h2 class="overlay-title">{{ post?.username }}</h2>
                     <p class="overlay-description">{{ post?.description }}</p>
                   </div>
-                  
                 </div>
               </div>
             </div>
@@ -58,7 +56,6 @@ const goBack = () => {
   </template>
 
   <style scoped>
-
 ion-content {
   --background: #202020;
 }
@@ -101,20 +98,6 @@ ion-content {
 
 .overlay-content {
   text-align: left;
-}
-
-.overlay-icons {
-  display: flex;
-  flex-direction: column; /* Keep as column */
-  position: absolute;
-  top: 50%; /* Centralize vertically */
-  left: 90%; 
-  color: white;
-}
-
-.overlay-icons ion-icon {
-  font-size: 30px;
-  margin-bottom: 40px;
 }
 
 .overlay-title {

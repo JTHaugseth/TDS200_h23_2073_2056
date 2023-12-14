@@ -1,19 +1,6 @@
 <script setup lang="ts">
-import {
-  IonPage,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
-  IonContent,
-  IonButton,
-  IonItem,
-  IonLabel,
-  IonAvatar,
-  IonImg,
-  IonIcon
-} from '@ionic/vue';
-
-import { ref, onMounted } from 'vue';
+import {IonPage,IonHeader,IonToolbar,IonTitle,IonContent,IonButton,IonAvatar,IonIcon} from '@ionic/vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { authService } from '@/service/firebase.authService';
 import { firestoreService } from "@/service/firebase.firestoreService";
@@ -27,35 +14,56 @@ const userPosts = ref<Post[]>([]);
 const showPosts = ref(true);
 const activeIcon = ref('posts');
 const isLoading = ref(true);
-
+const allPosts = ref<Post[]>([]);
 const router = useRouter();
 
+// Fetch user profile and posts
 const fetchUserProfileAndPosts = async () => {
   const currentUser = await authService.currentUser();
   if (currentUser) {
     userProfile.value = await firestoreService.getUserProfile(currentUser.uid) as UserProfile;
-    userPosts.value = await firestoreService.getUserPosts(currentUser.uid);
+    allPosts.value = await firestoreService.getAllPosts(); 
+    userPosts.value = allPosts.value.filter(post => post.postedBy === currentUser.uid); 
     isLoading.value = false;
   }
 };
 
 onMounted(fetchUserProfileAndPosts);
 
+// Logout
 const logout = async () => {
   await authService.logout();
   router.push('/authentication');
 };
 
+// Show posts grid
 const showPostsGrid = () => {
   showPosts.value = true;
   activeIcon.value = 'posts';
 };
 
+// Show liked posts
 const showLikes = () => {
   showPosts.value = false;
   activeIcon.value = 'likes';
 };
 
+// Get posts liked by the user
+const likedPosts = computed(() => {
+  return allPosts.value.filter(post => userProfile.value?.likedPosts.includes(post.id));
+});
+
+// Get posts to display
+const displayPosts = computed(() => {
+  if (activeIcon.value === 'posts') {
+    return userPosts.value;
+  } else if (activeIcon.value === 'likes') {
+    return likedPosts.value;
+  }
+  return [];
+});
+
+// Select profile picture
 const selectProfilePicture = async () => {
   try {
     const photo = await Camera.getPhoto({
@@ -74,6 +82,7 @@ const selectProfilePicture = async () => {
   }
 };
 
+// Upload new profile picture
 const uploadProfilePicture = async (imageUrl: string) => {
   try {
     const currentUser = await authService.currentUser();
@@ -94,6 +103,7 @@ const uploadProfilePicture = async (imageUrl: string) => {
   }
 };
 
+// Open a post
 const openPost = (id: string) => {
   router.push({
       path: '/view-post',
@@ -127,19 +137,16 @@ const openPost = (id: string) => {
             :class="{ active: activeIcon === 'likes' }"></IonIcon>
         </div>
       </div>
-
-      <!-- Loading Spinner -->
       <div v-if="isLoading" class="loading-spinner"></div>
 
-      <!-- Posts Grid or No Posts Message -->
       <div v-else>
-        <div v-if="showPosts" class="posts-grid">
-          <div v-for="post in userPosts" :key="post.id" class="post-container">
-              <img class="post-item" :src="post.imageURL" :alt="post.description" @click="openPost(post.id)" />
+        <div v-if="displayPosts.length > 0" class="posts-grid">
+          <div v-for="post in displayPosts" :key="post.id" class="post-container">
+            <img class="post-item" :src="post.imageURL" :alt="post.description" @click="openPost(post.id)" />
           </div>
         </div>
         <div v-else class="no-liked-posts-message">
-          No liked posts
+          No posts to display
         </div>
       </div>
     </ion-content>

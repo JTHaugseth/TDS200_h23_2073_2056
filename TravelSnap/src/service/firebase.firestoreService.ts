@@ -4,6 +4,7 @@ import { Post } from "../models/postInterface";
 
 export const firestoreService = {
 
+  // Register a new user with the given email, password, and username.
   async createUserProfile(userId: string, userData: any) {
     const db = getFirestore();
     try {
@@ -14,6 +15,7 @@ export const firestoreService = {
     }
   },
 
+  // Get the user profile for the given user ID.
   async getUserProfile(userId: string) {
     const db = getFirestore();
     try {
@@ -32,6 +34,7 @@ export const firestoreService = {
     }
   },
 
+  // Get the default profile picture URL.
   async getDefaultProfilePicUrl() {
     const storage = getStorage();
     const defaultPicRef = ref(storage, 'default-profile-picture.JPG');
@@ -44,6 +47,7 @@ export const firestoreService = {
     }
   },
 
+  // Uploads image and returns the URL.
   async uploadImageAndGetURL(userId: string, imageFile: File) {
     const storage = getStorage();
     const uniqueImageName = `PostImages/${userId}_${new Date().getTime()}`;
@@ -52,6 +56,7 @@ export const firestoreService = {
     return getDownloadURL(imageSnapshot.ref);
   },
 
+  // Uploads profile picture and returns the URL.
   async uploadProfilePictureAndGetURL(userId: string, imageFile: File) {
     const storage = getStorage();
     const uniqueImageName = `ProfilePictures/${userId}_${new Date().getTime()}`;
@@ -60,6 +65,7 @@ export const firestoreService = {
     return getDownloadURL(imageSnapshot.ref);
   },
 
+  // Update the user's profile picture.
   async updateUserProfilePicture(userId: string, newPicUrl: string) {
     const db = getFirestore();
     const userDocRef = doc(db, "users", userId);
@@ -72,6 +78,7 @@ export const firestoreService = {
     }
   },
 
+  // Creates a new post with the given data.
   async createNewPost(userId: string, username: string, description: string, imageUrl: string, geolocation: { lat: number, lng: number }) {
     const db = getFirestore();
     const postDocRef = await addDoc(collection(db, 'posts'), {
@@ -86,6 +93,7 @@ export const firestoreService = {
     return postDocRef.id;
   },
 
+  // Update the user's posts (used after the user has created a post)
   async addUserPost(userId: string, postId: string) {
     const db = getFirestore();
     const userDocRef = doc(db, "users", userId);
@@ -100,6 +108,7 @@ export const firestoreService = {
     }
   },
 
+  // Get the user's posts.
   async getUserPosts(userId: string) {
     const db = getFirestore();
     try {
@@ -124,6 +133,7 @@ export const firestoreService = {
     }
   },
 
+  // Get post by ID
   async getPostById(postId: string) {
     const db = getFirestore();
     try {
@@ -152,6 +162,7 @@ export const firestoreService = {
     }
   },
 
+  // Get all posts (used in the Home page)
   async getAllPosts() {
     const db = getFirestore();
     try {
@@ -175,6 +186,7 @@ export const firestoreService = {
     }
   },
   
+  // Updates the users liked posts if the user likes or unlikes a post.
   async updateUserLikedPost(userId: string, postId: string, like: boolean) {
     const db = getFirestore();
     const userDocRef = doc(db, "users", userId);
@@ -195,6 +207,7 @@ export const firestoreService = {
     }
   },
 
+  // Creates a comment for the given post.
   async createComment(postId: string, userId: string, userName:string, userImage: string, text: string) {
     const db = getFirestore();
     try {
@@ -217,16 +230,14 @@ export const firestoreService = {
     }
   },
 
+  // Get all comments for the given post.
   async getCommentsByPostId(postId: string) {
     const db = getFirestore();
     try {
-      // Define the path to the comments sub-collection for the given post
       const commentsRef = collection(db, "posts", postId, "comments");
-  
-      // Create a query to retrieve all comments
+
       const querySnapshot = await getDocs(commentsRef);
   
-      // Map over the documents in the querySnapshot to extract comment data
       return querySnapshot.docs.map(doc => {
         const data = doc.data();
         return {
@@ -244,30 +255,29 @@ export const firestoreService = {
     }
   },
 
+  // Delete the given comment. (only the user who created the comment can delete it)
   async deleteComment(postId: string, commentId: string, userId: string) {
     const db = getFirestore();
     try {
-      // Reference to the specific comment
       const commentRef = doc(db, "posts", postId, "comments", commentId);
-  
-      // Get the comment data
       const commentSnap = await getDoc(commentRef);
+
       if (!commentSnap.exists()) {
         throw new Error("Comment does not exist.");
       }
       const commentData = commentSnap.data();
   
-      // Check if the current user is the owner of the comment
+
       if (commentData.userId !== userId) {
         throw new Error("User is not authorized to delete this comment.");
       }
   
-      // Delete the comment
       await deleteDoc(commentRef);
     } catch (error) {
       console.error("Error deleting comment:", error);
       throw error;
     }
   },
+
 
 };
